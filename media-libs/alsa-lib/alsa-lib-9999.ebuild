@@ -51,7 +51,7 @@ src_unpack() {
 	git_src_unpack
 	cd "${S}"
 	elibtoolize
-        epunt_cxx
+        epunt_cxx
 	eautoreconf
 }
 
