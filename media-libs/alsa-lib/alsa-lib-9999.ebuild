@@ -19,7 +19,7 @@ EGIT_PROJECT="alsa-lib"
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~x86"
+KEYWORDS=""
 IUSE="doc debug alisp python static-libs"
 
 DEPEND=">=media-sound/alsa-headers-1.0.24
