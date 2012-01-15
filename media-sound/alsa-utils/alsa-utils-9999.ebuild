@@ -1,6 +1,5 @@
 # Copyright 1999-2011 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-sound/alsa-utils/alsa-utils-1.0.24.2-r1.ebuild,v 1.7 2011/12/29 21:33:35 halcy0n Exp $
 
 EAPI=3
 inherit autotools base eutils libtool systemd git python
