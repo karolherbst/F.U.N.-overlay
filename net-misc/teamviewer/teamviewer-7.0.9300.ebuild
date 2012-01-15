@@ -8,7 +8,7 @@ inherit eutils
 
 DESCRIPTION="the All-In-One Solution for Remote Access and Support over the Internet"
 HOMEPAGE="http://www.teamviewer.com"
-SRC_URI="http://www.teamviewer.com/download/${PN}_linux.tar.gz -> ${P}.tar.gz"
+SRC_URI="http://www.teamviewer.com/download/version_7x/teamviewer_linux.tar.gz -> ${P}.tar.gz"
 
 LICENSE="TeamViewer"
 SLOT="0"
@@ -30,7 +30,7 @@ pkg_setup() {
 
 src_install() {
 	insinto /opt/teamviewer/ || die
-	doins teamviewer6/.wine/drive_c/Program\ Files/TeamViewer/Version6/* ||
+	doins teamviewer7/.wine/drive_c/Program\ Files/TeamViewer/Version7/* ||
 		die
 	echo "#!/bin/bash" > teamviewer || die
 	echo "/usr/bin/wine /opt/teamviewer/TeamViewer.exe" >> teamviewer || die
@@ -40,10 +40,10 @@ src_install() {
 	local res
 	for res in 48; do
 		insinto /usr/share/icons/hicolor/${res}x${res}/apps
-		doins teamviewer6/.tvscript/teamviewer.png || die
+		doins teamviewer7/.tvscript/teamviewer.png || die
 	done
 
-	dodoc teamviewer6/linux_FAQ_{EN,DE}.txt || die
+	dodoc teamviewer7/linux_FAQ_{EN,DE}.txt || die
 
 	make_desktop_entry ${PN} TeamViewer ${PN}
 }
