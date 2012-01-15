@@ -1,0 +1,73 @@
+diff -Nru supertuxkart-0.7.3-rc1.old/Makefile.am supertuxkart-0.7.3-rc1/Makefile.am
+--- supertuxkart-0.7.3-rc1.old/Makefile.am	2011-11-04 18:04:00.140067080 +0100
++++ supertuxkart-0.7.3-rc1/Makefile.am	2011-11-04 18:16:52.044066969 +0100
+@@ -1,9 +1,7 @@
+ ACLOCAL_AMFLAGS = -I m4
+ 
+-SUBDIRS = $(BULLETTREE) $(ENETTREE) src doc data tools
++SUBDIRS = $(BULLETTREE) $(ENETTREE) src data tools
+ 
+-pkgdatadir=$(datadir)/doc/$(PACKAGE)
+-dist_pkgdata_DATA=AUTHORS ChangeLog COPYING README
+ EXTRA_DIST=autogen.sh m4 CMakeLists.txt
+ 
+ # NEWS only contains "see changelog"
+diff -Nru supertuxkart-0.7.3-rc1.old/configure.ac supertuxkart-0.7.3-rc1/configure.ac
+--- supertuxkart-0.7.3-rc1.old/configure.ac	2011-11-02 01:06:03.000000000 +0100
++++ supertuxkart-0.7.3-rc1/configure.ac	2011-11-04 18:14:12.897066995 +0100
+@@ -106,7 +106,7 @@
+    LIBS=$save_LIBS
+    if test "x$ac_cv_search_glNewList" = "x-lGLcore"; then
+        # if GLcore found, then also check for GL
+-       AC_SEARCH_LIBS(glXCreateContext, GL)
++       AC_SEARCH_LIBS(gluLookAt, GL)
+    fi
+    ;;
+ esac
+@@ -402,7 +402,6 @@
+   enet_LIBS="-Lenet -lenet"
+   ;;
+ esac
+-ENETTREE="src/enet"
+ 
+ # ==========================================
+ # Check for a known compiler bug, details in 
+@@ -455,7 +454,6 @@
+  src/ide/Makefile                   \
+  src/bullet/Makefile                \
+  src/bullet/src/Makefile            \
+- src/enet/Makefile                  \
+  tools/Makefile                 
+ ])
+ AC_OUTPUT
+diff -Nru supertuxkart-0.7.3-rc1.old/data/Makefile.am supertuxkart-0.7.3-rc1/data/Makefile.am
+--- supertuxkart-0.7.3-rc1.old/data/Makefile.am	2011-11-04 18:04:00.189067080 +0100
++++ supertuxkart-0.7.3-rc1/data/Makefile.am	2011-11-04 18:15:34.525066981 +0100
+@@ -10,16 +10,3 @@
+  stk_config.xml  powerup.xml  items.xml                  \
+  CREDITS run_me.sh 
+ 
+-desktopdir = $(prefix)/share/applications
+-desktop_DATA = supertuxkart.desktop
+-
+-icondir = $(prefix)/share/pixmaps
+-dist_icon_DATA = supertuxkart_32.xpm supertuxkart_64.xpm
+-
+-
+-# The desktop file needs the absolute path to the binary
+-# since e.g. /usr/games might not be in the standard path
+-EXTRA_DIST = supertuxkart_desktop.template
+-CLEANFILES = supertuxkart.desktop
+-supertuxkart.desktop: Makefile supertuxkart_desktop.template
+-	sed 's#PREFIX#$(prefix)#' $(srcdir)/supertuxkart_desktop.template|sed 's#VERSION#@VERSION@#' >supertuxkart.desktop
+diff -Nru supertuxkart-0.7.3-rc1.old/src/Makefile.am supertuxkart-0.7.3-rc1/src/Makefile.am
+--- supertuxkart-0.7.3-rc1.old/src/Makefile.am	2011-11-04 18:04:00.147067080 +0100
++++ supertuxkart-0.7.3-rc1/src/Makefile.am	2011-11-04 18:17:27.461066971 +0100
+@@ -2,7 +2,6 @@
+ 
+ SUBDIRS = ide
+ 
+-bindir=$(prefix)/games
+ bin_PROGRAMS = supertuxkart
+ 
+ AM_CPPFLAGS = -DSUPERTUXKART_DATADIR="\"$(datadir)/$(PACKAGE)/\""  \

@@ -1,0 +1,22 @@
+diff -Nru supertuxkart-0.7.3-rc1.old//configure.ac supertuxkart-0.7.3-rc1/configure.ac
+--- supertuxkart-0.7.3-rc1.old//configure.ac	2011-11-02 01:06:03.000000000 +0100
++++ supertuxkart-0.7.3-rc1/configure.ac	2011-11-04 20:08:34.362066023 +0100
+@@ -244,7 +244,7 @@
+ # ---- Check these flags do work by building a small irrLicht sample
+ echo "checking for irrlicht libraries..."
+ save_LIBS=$LIBS
+-LIBS="$LIBS $irrlicht_LIBS $opengl_LIBS"
++LIBS="$LIBS $irrlicht_LIBS $opengl_LIBS -lm -lz -lX11"
+ 
+ irrlicht_sample_built_fine="false"
+ 
+diff -Nru supertuxkart-0.7.3-rc1.old//src/Makefile.am supertuxkart-0.7.3-rc1/src/Makefile.am
+--- supertuxkart-0.7.3-rc1.old//src/Makefile.am	2011-11-02 01:04:11.000000000 +0100
++++ supertuxkart-0.7.3-rc1/src/Makefile.am	2011-11-04 20:09:28.527066041 +0100
+@@ -477,4 +477,5 @@
+ supertuxkart_LDADD = \
+         $(irrlicht_LIBS) $(fribidi_LIBS) $(bullet_LIBS) $(enet_LIBS) \
+         $(opengl_LIBS) $(openal_LIBS) $(oggvorbis_LIBS) \
+-        $(INTLLIBS) $(LIBCURL_LIBS) $(LIBCURL_CFLAGS)
++        $(INTLLIBS) $(LIBCURL_LIBS) $(LIBCURL_CFLAGS) \
++	-lm -lX11 -lz

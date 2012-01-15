@@ -1,0 +1,34 @@
+#!/sbin/runscript
+# Copyright 1999-2011 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+depend() {
+	need net
+}
+
+start() {
+	ebegin "Starting TeamSpeak 3 TSDNS Server"
+
+	start-stop-daemon --start --quiet --background \
+		--pidfile "/var/run/teamspeak3-server/tsdns.pid" --make-pidfile \
+		--chuid "teamspeak3" --chdir "/opt/teamspeak3-server/tsdns" \
+		--exec "/opt/teamspeak3-server/tsdns/tsdnsserver"
+	
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping TeamSpeak 3 TSDNS Server"
+
+	start-stop-daemon --stop --quiet \
+		--pidfile "/var/run/teamspeak3-server/tsdns.pid"
+
+	eend $?
+}
+
+restart() {
+	svc_stop
+	sleep 3
+	svc_start
+}
