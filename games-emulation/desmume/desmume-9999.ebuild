@@ -17,6 +17,7 @@ KEYWORDS=""
 IUSE="openal gtk glade osmesa nls wifi wxwidgets"
 
 DEPEND="virtual/opengl
+    dev-vcs/subversion[webdav-neon]
 	sys-libs/zlib
 	dev-libs/zziplib
 	media-libs/libsdl[joystick]
@@ -31,7 +32,21 @@ DEPEND="virtual/opengl
 	osmesa? ( media-libs/mesa[osmesa] )
 	wifi? ( net-libs/libpcap )
 	wxwidgets? ( x11-libs/wxGTK )"
-RDEPEND="${DEPEND}"
+RDEPEND="virtual/opengl
+    sys-libs/zlib
+    dev-libs/zziplib
+    media-libs/libsdl[joystick]
+    x11-libs/agg
+    nls? ( virtual/libintl
+        sys-devel/gettext )
+    openal? ( media-libs/openal )
+    gtk? ( >=x11-libs/gtk+-2.8.0
+        x11-libs/gtkglext )
+    glade? ( gnome-base/libglade
+        x11-libs/gtkglext )
+    osmesa? ( media-libs/mesa[osmesa] )
+    wifi? ( net-libs/libpcap )
+    wxwidgets? ( x11-libs/wxGTK )"
 
 src_prepare() {
 	use wifi && \
