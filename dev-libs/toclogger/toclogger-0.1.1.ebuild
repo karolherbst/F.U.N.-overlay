@@ -8,7 +8,8 @@ SRC_URI="http://karolherbst.de/toc/archives/${PN}/${PN}-${PV}.tar.gz"
 
 KEYWORDS="~amd64"
 SLOT="0"
-DEPEND="dev-libs/boost"
+DEPEND="dev-libs/boost
+        dev-libs/tocstring"
 RDEPEND="dev-libs/boost
         dev-libs/tocstring"
 
