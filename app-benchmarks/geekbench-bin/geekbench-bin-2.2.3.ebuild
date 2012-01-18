@@ -8,7 +8,7 @@ SRC_URI="http://s3.amazonaws.com/geekbench/Geekbench-${PV}-Linux.tar.gz"
 HOMEPAGE="http://www.geekpatrol.ca/geekbench/" 
 RESTRICT="nostrip" 
 
-KEYWORDS="-* ~x86" 
+KEYWORDS="~x86 ~amd64" 
 SLOT="0" 
 IUSE="" 
 RDEPEND=">=sys-devel/gcc-4.0.2-r3" 
