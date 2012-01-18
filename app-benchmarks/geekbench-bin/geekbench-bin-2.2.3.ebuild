@@ -24,5 +24,6 @@ src_compile() {
 src_install() { 
         cd ${PORTAGE_TMPDIR}/portage/app-benchmarks/geekbench-bin-${PV}/work/dist/Geekbench-${PV}-Linux
 
-        dobin geekbench 
+        dobin geekbench_x86_32
+        dobin geekbench_x86_64
 } 
