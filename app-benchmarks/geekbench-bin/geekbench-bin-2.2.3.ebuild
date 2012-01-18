@@ -26,4 +26,5 @@ src_install() {
 
         dobin geekbench_x86_32
         dobin geekbench_x86_64
+        dobin geekbench.plar
 } 
