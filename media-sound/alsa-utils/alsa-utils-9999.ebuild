@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=3
-inherit autotools base eutils libtool systemd git python
+inherit autotools base eutils libtool systemd git-2 python
 
 MY_P=${P/_rc/rc}
 ALSA_DRIVER_VER="1.0.24"
@@ -43,7 +43,7 @@ pkg_setup() {
 }
 
 src_unpack() {
-        git_src_unpack
+        git-2_src_unpack
         cd "${S}"
 }
 
