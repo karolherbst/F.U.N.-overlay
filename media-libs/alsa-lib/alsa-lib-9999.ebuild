@@ -6,7 +6,7 @@ EAPI=3
 
 PYTHON_DEPEND="python? 2"
 
-inherit eutils libtool python multilib autotools git
+inherit eutils libtool python multilib autotools git-2
 
 MY_P=${P/_rc/rc}
 S=${WORKDIR}/${MY_P}
@@ -48,7 +48,7 @@ pkg_setup() {
 }
 
 src_unpack() {
-	git_src_unpack
+	git-2_src_unpack
 	cd "${S}"
 	elibtoolize
         epunt_cxx

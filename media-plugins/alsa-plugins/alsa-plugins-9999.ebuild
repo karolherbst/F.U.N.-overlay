@@ -6,7 +6,7 @@ EAPI=3
 
 MY_P="${P/_/}"
 
-inherit autotools base flag-o-matic git
+inherit autotools base flag-o-matic git-2
 
 DESCRIPTION="ALSA extra plugins"
 HOMEPAGE="http://www.alsa-project.org/"
@@ -41,7 +41,7 @@ PATCHES=(
 S="${WORKDIR}/${MY_P}"
 
 src_unpack() {
-	git_src_unpack
+	git-2_src_unpack
 	cd "${S}"
 }
 
