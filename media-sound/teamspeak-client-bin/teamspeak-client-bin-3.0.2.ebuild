@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: /var/cvsroot/gentoo-x86/media-sound/teamspeak-client-bin/teamspeak-client-bin-3.0.1.ebuild,v 1.1 2011/08/26 15:08:21 cthulhu Exp $
 
-EAPI=1
+EAPI=2
 
 inherit eutils
 
@@ -23,7 +23,7 @@ SRC_URI="
 DEPEND=""
 RDEPEND="${DEPEND}
 		>=media-libs/libpng-1.4
-		>=x11-libs/qt-gui-4.7
+		>=x11-libs/qt-gui-4.7[accessibility]
 		>=x11-libs/libXinerama-1.0.2"
 
 src_unpack() {
