@@ -14,10 +14,14 @@ KEYWORDS="~amd64 ~x86"
 IUSE=""
 RESTRICT="strip"
 PROPERTIES="interactive"
-
+LANGS="ca de en es fr pt ru"
+for x in ${LANGS} ; do
+	IUSE="${IUSE} linguas_${x}"
+done
+RESTRICT="strip"
 SRC_URI="
-	amd64? ( http://ftp.4players.de/pub/hosted/ts3/releases/${PV/_/-}/TeamSpeak3-Client-linux_amd64-${PV/_/-}.run )
-	x86? ( http://ftp.4players.de/pub/hosted/ts3/releases/${PV/_/-}/TeamSpeak3-Client-linux_x86-${PV/_/-}.run )
+	amd64? ( http://teamspeak.gameserver.gamed.de/ts3/releases/3.0.2/TeamSpeak3-Client-linux_amd64-3.0.2.run )
+	x86? ( http://teamspeak.gameserver.gamed.de/ts3/releases/3.0.2/TeamSpeak3-Client-linux_amd64-3.0.2.run )
 "
 
 DEPEND=""
@@ -52,5 +56,14 @@ src_install() {
 	make_desktop_entry teamspeak3 TeamSpeak3 \
 		"/opt/teamspeak3-client/gfx/default/24x24_connect.png" \
 		Network
+	# translations
+	local lang=
+	for lang in ${LINGUAS}; do
+		# de and en are handled internally
+		if [[ ${lang} != de ]] && [[ ${lang} != en ]]; then
+			cp "${FILESDIR}/linguas_${lang}/styles/default/"* "${dest}/styles/default/" || die
+			cp "${FILESDIR}/linguas_${lang}/translations/"* "${dest}/translations/" || die
+		fi
+	done
 }
 
