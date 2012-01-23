@@ -77,7 +77,7 @@ src_prepare() {
 	echo "metadata/core.xml.in" >> "${S}/po/POTFILES.skip"
 
         # fix cont corruption, bug #343861
-        epatch "${FILESDIR}"/${P}-r2-fontcorruption.patch
+        epatch "${FILESDIR}"/${P}-fontcorruption.patch
         epatch "${FILESDIR}"/${P}-gdk-display-deprecated.patch
 
 	if ! use gnome || ! use gconf; then
