@@ -6,7 +6,7 @@ EAPI="3"
 
 if [[ ${PV} != *9999* ]]; then
 	SRC_URI="http://releases.compiz.org/${PV}/${P}.tar.bz2"
-	KEYWORDS="~x86 ~amd64"
+	KEYWORDS=""
 else
 	EGIT_HAS_SUBMODULES=true
 	GIT_ECLASS="git"

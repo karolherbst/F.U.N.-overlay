@@ -9,7 +9,7 @@ MY_P="${MY_PN}-${PV}"
 
 if [[ ${PV} != *9999* ]]; then
 	SRC_URI="http://releases.compiz.org/${PV}/${MY_P}.tar.bz2"
-	KEYWORDS="~x86 ~amd64"
+	KEYWORDS=""
 else
 	GIT_ECLASS="git"
 	EGIT_REPO_URI="git://anongit.compiz-fusion.org/${PN}/core"
