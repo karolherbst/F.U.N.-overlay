@@ -34,6 +34,10 @@ DEPEND="${RDEPEND}
 	gconf? ( gnome-base/gconf:2 )
 "
 
+src_unpack() {
+        epatch "${FILESDIR}/notification-0.9.4.patch"
+}
+
 src_prepare() {
 	if ! use gconf; then
 		epatch "${FILESDIR}"/${PN}-no-gconf.patch
