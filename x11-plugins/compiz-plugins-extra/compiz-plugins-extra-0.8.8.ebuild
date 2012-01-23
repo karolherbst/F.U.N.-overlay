@@ -39,10 +39,6 @@ src_prepare() {
 		epatch "${FILESDIR}"/${PN}-no-gconf.patch
 	fi
 
-	epatch "${FILESDIR}/${P}-libnotify.patch"
-
-	# required to apply the above patch
-	intltoolize --copy --force || die "intltoolize failed"
 	eautoreconf || die "eautoreconf failed"
 }
 
