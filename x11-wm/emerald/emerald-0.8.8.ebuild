@@ -31,8 +31,6 @@ DEPEND="${RDEPEND}
 	>=sys-devel/gettext-0.15
 "
 
-src_prepare() {
-}
 
 src_configure() {
 	econf \
