@@ -20,8 +20,8 @@ for x in ${LANGS} ; do
 done
 RESTRICT="strip"
 SRC_URI="
-	amd64? ( http://teamspeak.gameserver.gamed.de/ts3/releases/3.0.2/TeamSpeak3-Client-linux_amd64-3.0.2.run )
-	x86? ( http://teamspeak.gameserver.gamed.de/ts3/releases/3.0.2/TeamSpeak3-Client-linux_amd64-3.0.2.run )
+	amd64? ( http://teamspeak.gameserver.gamed.de/ts3/releases/${PV}/TeamSpeak3-Client-linux_amd64-${PV}.run )
+	x86? ( http://teamspeak.gameserver.gamed.de/ts3/releases/${PV}/TeamSpeak3-Client-linux_amd64-${PV}.run )
 "
 
 DEPEND=""
