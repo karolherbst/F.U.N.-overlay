@@ -18,7 +18,7 @@ IUSE=""
 RDEPEND="
 	!x11-plugins/compiz-fusion-plugins-main
 	>=gnome-base/librsvg-2.14.0
-	media-libs/jpeg
+	virtual/jpeg
 	x11-libs/cairo
 	~x11-wm/compiz-${PV}
 "
