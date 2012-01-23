@@ -32,7 +32,6 @@ DEPEND="${RDEPEND}
 "
 
 src_prepare() {
-		include/emerald.h || die
 }
 
 src_configure() {
