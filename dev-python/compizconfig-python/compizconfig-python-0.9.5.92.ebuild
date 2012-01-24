@@ -26,4 +26,4 @@ DEPEND="
 	>=x11-wm/compiz-${PV}
 "
 RDEPEND="${DEPEND}"
-S="${WORKDIR}/compizconfig-python"
+S="${WORKDIR}/compizconfig-python-${PV}"
