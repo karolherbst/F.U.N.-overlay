@@ -20,7 +20,7 @@ DEPEND="
 	>=dev-python/pygtk-2.10
 "
 RDEPEND="${DEPEND}"
-S="${WORKDIR}/ccsm"
+S="${WORKDIR}/ccsm-${PV}"
 
 src_install() {
 	distutils_src_install --prefix="/usr"
