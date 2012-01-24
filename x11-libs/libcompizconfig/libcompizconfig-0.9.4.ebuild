@@ -19,7 +19,7 @@ RDEPEND="
 	dev-libs/libxml2
 	dev-libs/libxslt
 	dev-libs/protobuf
-	~x11-wm/compiz-${PV}
+	>=x11-wm/compiz-${PV}
 "
 DEPEND="${RDEPEND}
 	>=dev-util/pkgconfig-0.19
