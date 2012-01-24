@@ -29,8 +29,8 @@ RDEPEND="
 	>=gnome-base/librsvg-2.14.0
 	virtual/jpeg
 	x11-libs/cairo
-	~x11-plugins/compiz-plugins-main-${PV}
-	~x11-wm/compiz-${PV}
+	>=x11-plugins/compiz-plugins-main-${PV}
+	>=x11-wm/compiz-${PV}
 "
 
 DEPEND="${RDEPEND}
