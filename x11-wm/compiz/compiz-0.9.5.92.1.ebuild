@@ -75,7 +75,7 @@ RDEPEND="${COMMONDEPEND}
 	x11-apps/xvinfo
 "
 
-S="${WORKDIR}/core"
+S="${WORKDIR}"
 
 #src_prepare() {
 # this patch doesnt seem to apply to the newest version ~mordjah
