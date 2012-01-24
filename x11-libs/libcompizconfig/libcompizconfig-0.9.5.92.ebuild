@@ -24,7 +24,7 @@ RDEPEND="
 DEPEND="${RDEPEND}
 	>=dev-util/pkgconfig-0.19
 "
-S="${WORKDIR}/libcompizconfig"
+S="${WORKDIR}/libcompizconfig-${PV}"
 
 src_configure() {
 	mycmakeargs=(
