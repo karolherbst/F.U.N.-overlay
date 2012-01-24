@@ -74,6 +74,12 @@ strip_builddir() {
 		|| die "Could not strip director ${directory} from build."
 }
 
+src_unpack() {
+	git-2_src_unpack
+    cd "${S}"
+	./autogen.sh
+}
+
 src_prepare() {
 	# -O3 and company cause random crashes in applications. Bug #133469
 	replace-flags -O3 -O2
