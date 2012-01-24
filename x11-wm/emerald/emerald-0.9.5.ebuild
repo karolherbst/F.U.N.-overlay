@@ -33,6 +33,7 @@ DEPEND="${RDEPEND}
 
 
 src_configure() {
+	./autogen.sh
 	econf \
 		--disable-dependency-tracking \
 		--disable-static \
