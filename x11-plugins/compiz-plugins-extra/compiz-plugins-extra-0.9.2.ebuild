@@ -43,6 +43,14 @@ DEPEND="${RDEPEND}
 
 S="${WORKDIR}/${PN/compiz-/}"
 
+src_unpack() {
+    unpack ${A}
+    cd "${S}"
+    epatch "${FILESDIR}"/compiz-plugins-extra-0.8.6-libnotify.patch
+    epatch "${FILESDIR}"/compiz-plugins-extra-no-gconf.patch
+    epatch "${FILESDIR}"/notification-0.9.2.patch
+}
+
 src_configure() {
 	mycmakeargs=(
 		"-DCOMPIZ_DISABLE_SCHEMAS_INSTALL=ON"
