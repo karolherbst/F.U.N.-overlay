@@ -17,6 +17,6 @@ RDEPEND="
 	>=x11-plugins/compiz-plugins-extra-${PV}
 	>=x11-apps/ccsm-${PV}
 	gnome? ( >=x11-libs/compizconfig-backend-gconf-${PV} )
-	kde? ( >=x11-libs/compizconfig-backend-kconfig4-${PV} )
+	kde? ( x11-libs/compizconfig-backend-kconfig4 )
 	unsupported? ( >=x11-plugins/compiz-plugins-unsupported-${PV} )
 "
