@@ -19,7 +19,7 @@ SLOT="3"
 #  * http://mail.gnome.org/archives/gtk-devel-list/2010-November/msg00099.html
 # I tried this and got it all compiling, but the end result is unusable as it
 # horribly mixes up the backends -- grobian
-IUSE="aqua colord cups debug doc examples +introspection packagekit test vim-syntax wayland xinerama"
+IUSE="aqua colord cups debug doc examples +introspection packagekit test vim-syntax wayland X xinerama"
 if [[ ${PV} = 9999 ]]; then
 	KEYWORDS=""
 else
@@ -136,6 +136,7 @@ src_configure() {
 		$(use_enable colord)
 		$(use_enable introspection)
 		$(use_enable wayland wayland-backend)
+		$(use_enable X x11-backend)
 		--disable-papi
 		--enable-gtk2-dependency"
 
