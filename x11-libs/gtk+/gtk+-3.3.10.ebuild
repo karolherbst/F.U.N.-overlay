@@ -144,7 +144,7 @@ src_configure() {
 	if use aqua; then
 		myconf="${myconf} --enable-quartz-backend --disable-xinput"
 	else
-		myconf="${myconf} --enable-x11-backend --enable-xinput"
+		myconf="${myconf} --enable-xinput"
 	fi
 
 	# Passing --disable-debug is not recommended for production use
