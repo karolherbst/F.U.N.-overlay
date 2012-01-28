@@ -43,10 +43,6 @@ pkg_setup() {
 	fi
 }
 
-src_unpack() {
-        cd "${S}"
-}
-
 src_prepare() {
         elibtoolize
         epunt_cxx
