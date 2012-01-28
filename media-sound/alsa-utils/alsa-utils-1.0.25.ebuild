@@ -14,7 +14,7 @@ SRC_URI="mirror://alsaproject/utils/${MY_P}.tar.bz2
 
 LICENSE="GPL-2"
 SLOT="0.9"
-KEYWORDS=""
+KEYWORDS="~x86 ~amd64"
 IUSE="doc nls minimal"
 PROPERTIES="interactive"
 
