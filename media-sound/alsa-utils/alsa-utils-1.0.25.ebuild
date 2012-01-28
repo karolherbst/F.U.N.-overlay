@@ -50,10 +50,6 @@ src_unpack() {
 src_prepare() {
         elibtoolize
         epunt_cxx
-        aclocal -I m4
-        autoconf
-        autoheader
-        automake --add-missing --copy --foreign
 }
 
 src_configure() {
