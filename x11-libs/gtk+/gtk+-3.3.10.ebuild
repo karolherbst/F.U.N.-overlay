@@ -53,7 +53,8 @@ COMMON_DEPEND="!aqua? (
 	x11-misc/shared-mime-info
 	colord? ( >=x11-misc/colord-0.1.9 )
 	cups? ( net-print/cups )
-	introspection? ( >=dev-libs/gobject-introspection-0.10.1 )"
+	introspection? ( >=dev-libs/gobject-introspection-0.10.1 )
+    wayland? ( dev-libs/wayland )"
 DEPEND="${COMMON_DEPEND}
 	>=dev-util/pkgconfig-0.9
 	!aqua? (
