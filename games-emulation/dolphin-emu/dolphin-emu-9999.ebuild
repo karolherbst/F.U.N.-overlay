@@ -3,13 +3,13 @@
 # $Header: $
 EAPI="3"
 
-inherit cmake-utils eutils flag-o-matic games subversion
+inherit cmake-utils eutils flag-o-matic games git-2 wxwidgets
 
 DESCRIPTION="Free. open source emulator for Nintendo GameCube and Wii"
 HOMEPAGE="http://www.dolphin-emu.com/"
 SRC_URI=""
-ESVN_REPO_URI="http://dolphin-emu.googlecode.com/svn/trunk/"
-ESVN_PROJECT="dolphin-emu-read-only"
+EGIT_REPO_URI="http://code.google.com/p/dolphin-emu/"
+EGIT_PROJECT="dolphin-emu"
 
 LICENSE="GPL-2"
 SLOT="0"
