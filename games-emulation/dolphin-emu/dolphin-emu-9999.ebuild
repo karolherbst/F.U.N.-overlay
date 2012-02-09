@@ -29,8 +29,7 @@ RDEPEND=">=media-libs/glew-1.5
 	lzo? ( dev-libs/lzo )
 	openal? ( media-libs/openal )
 	opencl? ( || ( media-libs/mesa[opencl]
-			x11-drivers/nvidia-drivers
-			x11-drivers/ati-drivers ) )
+			virtual/opencl ) )
 	opengl? ( virtual/opengl )
 	portaudio? ( media-libs/portaudio )
 	pulseaudio? ( media-sound/pulseaudio )
