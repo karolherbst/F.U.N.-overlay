@@ -17,7 +17,7 @@ EGIT_COMMIT="${PV}"
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~x86 amd64 ~ppc ~ppc64"
-IUSE="alsa ao bluetooth doc encode +lzo openal opengl portaudio pulseaudio +wxwidgets +xrandr"
+IUSE="alsa ao bluetooth doc encode +lzo openal opengl openmp portaudio pulseaudio +wxwidgets +xrandr"
 RESTRICT=""
 
 RDEPEND=">=media-libs/glew-1.5
@@ -31,6 +31,7 @@ RDEPEND=">=media-libs/glew-1.5
 	lzo? ( dev-libs/lzo )
 	openal? ( media-libs/openal )
 	opengl? ( virtual/opengl )
+    openmp? ( sys-devel/gcc[openmp] )
 	portaudio? ( media-libs/portaudio )
 	pulseaudio? ( media-sound/pulseaudio )
 	wxwidgets? ( x11-libs/wxGTK:2.8 )
