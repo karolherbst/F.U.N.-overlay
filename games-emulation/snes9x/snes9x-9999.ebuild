@@ -12,7 +12,7 @@ EGIT_REPO_URI="git://github.com/snes9xgit/snes9x.git"
 
 LICENSE="as-is GPL-2 LGPL-2.1"
 SLOT="0"
-KEYWORDS="amd64 ppc ppc64 x86"
+KEYWORDS=""
 IUSE="alsa debug gtk joystick multilib netplay nls opengl oss png pulseaudio portaudio +xv +xrandr zlib"
 
 RDEPEND="x11-libs/libX11
