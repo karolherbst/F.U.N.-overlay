@@ -1,6 +1,10 @@
 # Copyright 1999-2008 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
+
+# todo:
+# write patch to cmake files for alsa and other use flags
+
 EAPI="3"
 
 inherit cmake-utils eutils flag-o-matic games git-2 wxwidgets
@@ -14,7 +18,7 @@ EGIT_PROJECT="dolphin-emu"
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS=""
-IUSE="alsa ao bluetooth doc encode +lzo openal opencl opengl portaudio pulseaudio +wxwidgets +xrandr"
+IUSE="alsa ao bluetooth doc encode +lzo openal opencl opengl openmp portaudio pulseaudio +wxwidgets +xrandr"
 RESTRICT=""
 
 RDEPEND=">=media-libs/glew-1.5
@@ -31,6 +35,7 @@ RDEPEND=">=media-libs/glew-1.5
 	opencl? ( || ( media-libs/mesa[opencl]
 			virtual/opencl ) )
 	opengl? ( virtual/opengl )
+    openmp? ( sys-devel/gcc[openmp] )
 	portaudio? ( media-libs/portaudio )
 	pulseaudio? ( media-sound/pulseaudio )
 	xrandr? ( x11-libs/libXrandr )
@@ -45,6 +50,7 @@ DEPEND="${RDEPEND}
 
 src_configure() {
 	# Configure cmake
+    epatch "${FILESDIR}/CMakeLists.txt-9999.patch"
 	mycmakeargs="
 		-DDOLPHIN_WC_REVISION=9999
 		-DCMAKE_INSTALL_PREFIX=${GAMES_PREFIX}
@@ -52,7 +58,11 @@ src_configure() {
 		-Ddatadir=${GAMES_DATADIR}/${PN}
 		-Dplugindir=$(games_get_libdir)/${PN}
 		$(cmake-utils_use !wxwidgets DISABLE_WX)
-		$(cmake-utils_use encode ENCODE_FRAMEDUMPS)"
+        $(cmake-utils_use alsa ALSA)
+        $(cmake-utils_use bluetooth BLUETOOTH)
+		$(cmake-utils_use encode ENCODE_FRAMEDUMPS)
+        $(cmake-utils_use openmp OPENMP)
+        $(cmake-utils_use pulseaudio PULSEAUDIO)"
 	cmake-utils_src_configure
 }
 

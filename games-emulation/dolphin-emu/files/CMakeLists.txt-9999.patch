@@ -1,0 +1,132 @@
+--- CMakeLists.txt.ori	2012-02-12 12:57:43.064077840 +0100
++++ CMakeLists.txt	2012-02-12 13:06:08.101060971 +0100
+@@ -12,7 +12,7 @@
+ 	# Redirect the installation to a build directory where it does no harm.
+ #IGNORE 	set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install-dummy)
+ else()
+-	set(bindir  ${CMAKE_INSTALL_PREFIX}/bin               CACHE PATH "bindir")
++	set(bindir  ${CMAKE_INSTALL_PREFIX}/bin			   CACHE PATH "bindir")
+ 	set(datadir ${CMAKE_INSTALL_PREFIX}/share/dolphin-emu CACHE PATH "datadir")
+ 	add_definitions(-DDATA_DIR="${datadir}/")
+ endif()
+@@ -228,14 +228,17 @@
+ 	message("OpenMP parallelization disabled")
+ endif()
+ 
+-include(FindALSA OPTIONAL)
+-if(ALSA_FOUND)
+-	add_definitions(-DHAVE_ALSA=1)
+-	message("ALSA found, enabling ALSA sound backend")
+-else()
+-	add_definitions(-DHAVE_ALSA=0)
+-	message("ALSA NOT found, disabling ALSA sound backend")
+-endif(ALSA_FOUND)
++option(ALSA "Enable Alsa Audio Backend" ON)
++if(ALSA)
++	include(FindALSA OPTIONAL)
++	if(ALSA_FOUND)
++		add_definitions(-DHAVE_ALSA=1)
++		message("ALSA found, enabling ALSA sound backend")
++	else()
++		add_definitions(-DHAVE_ALSA=0)
++		message("ALSA NOT found, disabling ALSA sound backend")
++	endif(ALSA_FOUND)
++endif(ALSA)
+ 
+ check_lib(AO ao QUIET)
+ if(AO_FOUND)
+@@ -246,23 +249,29 @@
+ 	message("ao NOT found, disabling ao sound backend")
+ endif(AO_FOUND)
+ 
+-check_lib(BLUEZ bluez QUIET)
+-if(BLUEZ_FOUND)
+-	add_definitions(-DHAVE_BLUEZ=1)
+-	message("bluez found, enabling bluetooth support")
+-else()
+-	add_definitions(-DHAVE_BLUEZ=0)
+-	message("bluez NOT found, disabling bluetooth support")
+-endif(BLUEZ_FOUND)
+-
+-check_lib(PULSEAUDIO libpulse QUIET)
+-if(PULSEAUDIO_FOUND)
+-	add_definitions(-DHAVE_PULSEAUDIO=1)
+-	message("PulseAudio found, enabling PulseAudio sound backend")
+-else()
+-	add_definitions(-DHAVE_PULSEAUDIO=0)
+-	message("PulseAudio NOT found, disabling PulseAudio sound backend")
+-endif(PULSEAUDIO_FOUND)
++option(BLUETOOTH "Enable bluetooth support" ON)
++if(BLUETOOTH)
++	check_lib(BLUEZ bluez QUIET)
++	if(BLUEZ_FOUND)
++		add_definitions(-DHAVE_BLUEZ=1)
++		message("bluez found, enabling bluetooth support")
++	else()
++		add_definitions(-DHAVE_BLUEZ=0)
++		message("bluez NOT found, disabling bluetooth support")
++	endif(BLUEZ_FOUND)
++endif(BLUETOOTH)
++
++option(PULSEAUDIO "Enable pulseaudio audio backend" OFF)
++if(PULSEAUDIO)
++	check_lib(PULSEAUDIO libpulse QUIET)
++	if(PULSEAUDIO_FOUND)
++		add_definitions(-DHAVE_PULSEAUDIO=1)
++		message("PulseAudio found, enabling PulseAudio sound backend")
++	else()
++		add_definitions(-DHAVE_PULSEAUDIO=0)
++		message("PulseAudio NOT found, disabling PulseAudio sound backend")
++	endif(PULSEAUDIO_FOUND)
++endif(PULSEAUDIO)
+ 
+ include(FindOpenAL OPTIONAL)
+ if(OPENAL_FOUND)
+@@ -352,9 +361,9 @@
+ # NOTES about adding Externals:
+ #   - add the include directory here
+ #   - make sure to tell cmake to link them statically or dynamically (most
+-#     should be linked statically)
++#	 should be linked statically)
+ #   - place the CMakeLists.txt in the first-level subdirectory, e.g.
+-#     Externals/CLRun/CMakeLists.txt (that is: NOT in some Src/ subdirectory)
++#	 Externals/CLRun/CMakeLists.txt (that is: NOT in some Src/ subdirectory)
+ #
+ add_subdirectory(Externals/Bochs_disasm)
+ include_directories(Externals/Bochs_disasm)
+@@ -391,11 +400,11 @@
+ 	include(FindSFML OPTIONAL)
+ endif()
+ if(SFML_FOUND AND NOT SFML_VERSION_MAJOR) # SFML 1.x doesn't define SFML_VERSION_MAJOR
+-       message("Using shared SFML")
++	   message("Using shared SFML")
+ else()
+-       message("Using static SFML ${SFML_FIND_VERSION_MAJOR}.${SFML_FIND_VERSION_MINOR} from Externals")
+-       add_subdirectory(Externals/SFML)
+-       include_directories(Externals/SFML/include)
++	   message("Using static SFML ${SFML_FIND_VERSION_MAJOR}.${SFML_FIND_VERSION_MINOR} from Externals")
++	   add_subdirectory(Externals/SFML)
++	   include_directories(Externals/SFML/include)
+ endif()
+ 
+ if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+@@ -597,12 +606,12 @@
+ include(CPack)
+ 
+ MESSAGE(STATUS "<<< Gentoo configuration >>>
+-Build type      ${CMAKE_BUILD_TYPE}
+-Install path    ${CMAKE_INSTALL_PREFIX}
++Build type	  ${CMAKE_BUILD_TYPE}
++Install path	${CMAKE_INSTALL_PREFIX}
+ Compiler flags:
+-C               ${CMAKE_C_FLAGS}
+-C++             ${CMAKE_CXX_FLAGS}
++C			   ${CMAKE_C_FLAGS}
++C++			 ${CMAKE_CXX_FLAGS}
+ Linker flags:
+-Executable      ${CMAKE_EXE_LINKER_FLAGS}
+-Module          ${CMAKE_MODULE_LINKER_FLAGS}
+-Shared          ${CMAKE_SHARED_LINKER_FLAGS}\n")
++Executable	  ${CMAKE_EXE_LINKER_FLAGS}
++Module		  ${CMAKE_MODULE_LINKER_FLAGS}
++Shared		  ${CMAKE_SHARED_LINKER_FLAGS}\n")
