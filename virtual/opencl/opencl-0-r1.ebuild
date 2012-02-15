@@ -15,6 +15,6 @@ REQUIRED_USE="|| ( ${IUSE} )"
 
 RDEPEND="app-admin/eselect-opencl
 	|| (
-		video_cards_fglrx? ( >=x11-drivers/ati-drivers-11.2[opencl] )
-		video_cards_nvidia? ( >=x11-drivers/nvidia-drivers-290.10 )
+		video_cards_fglrx? ( x11-drivers/ati-drivers[opencl] )
+		video_cards_nvidia? ( x11-drivers/nvidia-drivers )
 	)"
