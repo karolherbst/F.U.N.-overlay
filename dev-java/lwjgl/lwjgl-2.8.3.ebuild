@@ -20,7 +20,7 @@ IUSE="-egl"
 
 CDEPEND="dev-java/apple-java-extensions-bin:0
 	dev-java/apt-mirror:0
-	dev-java/asm:4
+	dev-java/asm:3.999
 	dev-java/jinput:0
 	dev-java/jutils:0
 	x11-libs/libX11
@@ -43,7 +43,7 @@ S="${WORKDIR}"
 
 JAVA_PKG_BSFIX_NAME="build.xml build-generator.xml"
 JAVA_ANT_REWRITE_CLASSPATH="true"
-EANT_GENTOO_CLASSPATH="apple-java-extensions-bin apt-mirror asm-4 jinput jutils"
+EANT_GENTOO_CLASSPATH="apple-java-extensions-bin apt-mirror asm-3.999 jinput jutils"
 
 pkg_setup() {
 	if use egl; then
