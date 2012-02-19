@@ -43,7 +43,7 @@ S="${WORKDIR}"
 
 JAVA_PKG_BSFIX_NAME="build.xml build-generator.xml"
 JAVA_ANT_REWRITE_CLASSPATH="true"
-EANT_GENTOO_CLASSPATH="apple-java-extensions-bin apt-mirror asm-3.999 jinput jutils"
+EANT_GENTOO_CLASSPATH="apple-java-extensions-bin apt-mirror asm-4 jinput jutils"
 
 pkg_setup() {
 	if use egl; then
