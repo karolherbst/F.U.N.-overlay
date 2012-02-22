@@ -157,7 +157,7 @@ src_prepare() {
 	epatch "${FILESDIR}"/${PN}-0.8.9-external-dejagnu.patch
 
 	# Fix detection of recent ffmpeg, bug #362683
-	epatch "${FILESDIR}"/${PN}-0.8.9-ffmpeg-detection.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-ffmpeg-detection.patch
 	epatch "${FILESDIR}"/${PN}-0.8.9-libavcodec-version.patch
 	epatch "${FILESDIR}"/${PN}-0.8.9-look-harder-for-version_h.patch
 
