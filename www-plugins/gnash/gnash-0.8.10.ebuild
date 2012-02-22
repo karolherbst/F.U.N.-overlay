@@ -145,7 +145,7 @@ src_prepare() {
 #	epatch "${FILESDIR}"/${PN}-0.8.7-amf-include.patch
 
 	# Look for openvg.h in correct path
-	epatch "${FILESDIR}"/${PN}-0.8.9-find-openvg.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-find-openvg.patch
 
 	# Fix paths for klash, bug #339610
 	epatch "${FILESDIR}"/${PN}-0.8.9-klash.patch
