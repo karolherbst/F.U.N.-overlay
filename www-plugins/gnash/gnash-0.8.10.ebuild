@@ -151,7 +151,7 @@ src_prepare() {
 	epatch "${FILESDIR}"/${PN}-0.8.9-klash.patch
 
 	# Install documentation into the proper directories, bug #296110
-	epatch "${FILESDIR}"/${PN}-0.8.9-documentation-paths.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-documentation-paths.patch
 
 	# Use external dejagnu for tests, bug #321017
 	epatch "${FILESDIR}"/${PN}-0.8.9-external-dejagnu.patch
