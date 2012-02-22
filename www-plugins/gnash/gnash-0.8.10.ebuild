@@ -148,37 +148,37 @@ src_prepare() {
 #	epatch "${FILESDIR}"/${PN}-0.8.9-find-openvg.patch
 
 	# Fix paths for klash, bug #339610
-	epatch "${FILESDIR}"/${PN}-0.8.9-klash.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-klash.patch
 
 	# Install documentation into the proper directories, bug #296110
 #	epatch "${FILESDIR}"/${PN}-0.8.9-documentation-paths.patch
 
 	# Use external dejagnu for tests, bug #321017
-	epatch "${FILESDIR}"/${PN}-0.8.9-external-dejagnu.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-external-dejagnu.patch
 
 	# Fix detection of recent ffmpeg, bug #362683
 #	epatch "${FILESDIR}"/${PN}-0.8.9-ffmpeg-detection.patch
-	epatch "${FILESDIR}"/${PN}-0.8.9-libavcodec-version.patch
-	epatch "${FILESDIR}"/${PN}-0.8.9-look-harder-for-version_h.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-libavcodec-version.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-look-harder-for-version_h.patch
 
 	# Fix building against ffmpeg-0.8, bug #362949, upstream #33696
-	epatch "${FILESDIR}"/${PN}-0.8.9-no-deprecated-avcodec-audio-resample.patch
-	epatch "${FILESDIR}"/${PN}-0.8.9-no-deprecated-avcodec-decode-audio.patch
-	epatch "${FILESDIR}"/${PN}-0.8.9-no-deprecated-avcodec-decode-video.patch
-	epatch "${FILESDIR}"/${PN}-0.8.9-no-deprecated-avcodec-parser.patch
-	epatch "${FILESDIR}"/${PN}-0.8.9-no-deprecated-avformat-metadata.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-no-deprecated-avcodec-audio-resample.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-no-deprecated-avcodec-decode-audio.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-no-deprecated-avcodec-decode-video.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-no-deprecated-avcodec-parser.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-no-deprecated-avformat-metadata.patch
 
 	# Fix building on ppc64, bug #342535
-	use ppc64 && append-flags -mminimal-toc
+#	use ppc64 && append-flags -mminimal-toc
 
 	# Fix building of cygnal sshclient, bug #391915
-	epatch "${FILESDIR}"/${PN}-0.8.9-cygnal-sshclient.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-cygnal-sshclient.patch
 
 	# Fix kde multilib library path, bug #391283
-	epatch "${FILESDIR}"/${PN}-0.8.9-kde4-libdir.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-kde4-libdir.patch
 
 	# Fix security bug #391283
-	epatch "${FILESDIR}"/${PN}-0.8.9-cve-2011-4328.patch
+#	epatch "${FILESDIR}"/${PN}-0.8.9-cve-2011-4328.patch
 
 	eautoreconf
 }
