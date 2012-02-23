@@ -17,3 +17,5 @@ RDEPEND="
 	$(add_kdebase_dep kopete)
 "
 DEPEND="${RDEPEND}"
+
+S="${WORKDIR}/${PN}"
