@@ -1,6 +1,6 @@
 inherit cmake-utils
 
-EAPI="0"
+EAPI="2"
 
 TOCDEPEND="
     dev-libs/boost
@@ -24,3 +24,5 @@ toc_src_configure() {
     "
     cmake-utils_src_configure
 }
+
+EXPORT_FUNCTIONS src_configure
