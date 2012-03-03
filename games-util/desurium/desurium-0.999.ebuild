@@ -12,7 +12,7 @@ DESCRIPTION="Free software version of Desura game client"
 HOMEPAGE="http://subspacebattle.sf.net"
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="amd64 x86"
+#KEYWORDS="amd64 x86"
 IUSE=""
 
 DEPEND=">=sys-devel/gcc-4.5
