@@ -23,7 +23,7 @@ RDEPEND=">=dev-vcs/git-1.6.6[curl]"
 src_install() {
 	insinto /opt/${PN}
 	doins -r \
-		git_cl_hooks.py presubmit_canned_checks.py breakpad.py \
+		presubmit_canned_checks.py breakpad.py \
 		PRESUBMIT.py gclient.py	gclient_scm.py \
 		WATCHLISTS gclient_utils.py codereview.settings weekly scm.py \
 		tests zsh-goodies third_party || die "install failed"
