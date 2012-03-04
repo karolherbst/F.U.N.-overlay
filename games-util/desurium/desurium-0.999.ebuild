@@ -39,20 +39,20 @@ DEPEND=">=sys-devel/gcc-4.5
 		x11-libs/libX11
 		dev-libs/openssl
 		dev-util/scons
-		x11-libs/wxGTK
-		dev-libs/boost"
+		>=x11-libs/wxGTK-2.9.0
+		dev-libs/boost
+		dev-lang/v8
+		dev-util/google-breakpad
+		net-dns/c-ares
+		dev-util/gyp"
 		#Add dependencies for:
-		#wxWidgets
-		#boost
-		#breakpad?
-		#gyp?
 		#svn co http://src.chromium.org/svn/trunk/tools/depot_tools depot_tools
-		#svn co http://gyp.googlecode.com/svn/trunk gyp
-		#svn co http://google-breakpad.googlecode.com/svn/trunk -r 699  breakpad
-		#svn co http://svn.boost.org/svn/boost/tags/release/Boost_1_47_0 boost
-		#svn co http://v8.googlecode.com/svn/tags/3.7.7/ v8
-		#svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_0/ wxWidgets
-		#git clone git://github.com/bagder/c-ares.git c-ares
+		#check svn co http://gyp.googlecode.com/svn/trunk gyp
+		#check svn co http://google-breakpad.googlecode.com/svn/trunk -r 699  breakpad
+		#check svn co http://svn.boost.org/svn/boost/tags/release/Boost_1_47_0 boost
+		#check svn co http://v8.googlecode.com/svn/tags/3.7.7/ v8
+		#check svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_0/ wxWidgets
+		#check git clone git://github.com/bagder/c-ares.git c-ares
 
 RDEPEND="${DEPEND}"
 
