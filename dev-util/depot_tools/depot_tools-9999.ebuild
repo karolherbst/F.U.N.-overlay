@@ -32,7 +32,7 @@ src_install() {
 	doexe ${exes} || die "install failed"
 	for i in ${exes}
 	do
-		make_wrapper $i /opt/${PN}/$i "" "" /opt/bin || die "make_wrapper failed"
+		make_wrapper $i /opt/${PN}/$i "" "" /usr/bin || die "make_wrapper failed"
 	done
 	dodoc README README.gclient || die "dodoc failed"
 }
