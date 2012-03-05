@@ -43,9 +43,9 @@ DEPEND=">=sys-devel/gcc-4.5
 		dev-libs/boost
 		dev-lang/v8
 		dev-util/google-breakpad
-		net-dns/c-ares
 		dev-util/gyp
-		dev-util/depot_tools"
+		dev-util/depot_tools
+		net-misc/curl[ares]"
 		#Add dependencies for:
 		#check svn co http://src.chromium.org/svn/trunk/tools/depot_tools depot_tools
 		#check svn co http://gyp.googlecode.com/svn/trunk gyp
