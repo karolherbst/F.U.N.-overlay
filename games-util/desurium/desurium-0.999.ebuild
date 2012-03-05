@@ -45,7 +45,8 @@ DEPEND=">=sys-devel/gcc-4.5
 		dev-util/google-breakpad
 		dev-util/gyp
 		dev-util/depot_tools
-		net-misc/curl[ares]"
+		net-misc/curl[ares]
+		dev-libs/tinyxml"
 		#Add dependencies for:
 		#check svn co http://src.chromium.org/svn/trunk/tools/depot_tools depot_tools
 		#check svn co http://gyp.googlecode.com/svn/trunk gyp
