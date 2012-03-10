@@ -6,7 +6,7 @@ EAPI=2
 
 EGIT_REPO_URI="git://github.com/karolherbst/Desurium.git"
 
-inherit eutils subversion git-2
+inherit eutils subversion git-2 cmake-utils
 
 DESCRIPTION="Free software version of Desura game client"
 HOMEPAGE="http://subspacebattle.sf.net"
@@ -59,12 +59,3 @@ DEPEND=">=sys-devel/gcc-4.5
 RDEPEND="${DEPEND}"
 
 S="${WORKDIR}/desurium"
-
-src_compile() {
-	./build_cmake.sh
-}
-
-src_install() {
-	mv install /opt/desura
-}
-
