@@ -2,11 +2,11 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI=2
+EAPI=3
 
 EGIT_REPO_URI="https://github.com/karolherbst/Desurium.git"
 
-inherit eutils subversion git-2 cmake-utils
+inherit eutils git-2 cmake-utils
 
 DESCRIPTION="Free software version of Desura game client"
 HOMEPAGE="http://subspacebattle.sf.net"
