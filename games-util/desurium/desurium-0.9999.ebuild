@@ -4,7 +4,7 @@
 
 EAPI=2
 
-EGIT_REPO_URI="git://github.com/karolherbst/Desurium.git"
+EGIT_REPO_URI="https://github.com/karolherbst/Desurium.git"
 
 inherit eutils subversion git-2 cmake-utils
 
