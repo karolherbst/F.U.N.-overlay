@@ -13,7 +13,7 @@ HOMEPAGE="http://subspacebattle.sf.net"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="amd64 x86"
-IUSE="builtin-curl"
+IUSE="builtin-curl +builtin-tinyxml +builtin-breakpad +builtin-wxWidgets"
 
 DEPEND=">=sys-devel/gcc-4.5
 		dev-vcs/git
@@ -39,14 +39,14 @@ DEPEND=">=sys-devel/gcc-4.5
 		x11-libs/libX11
 		dev-libs/openssl
 		dev-util/scons
-		>=x11-libs/wxGTK-2.9.0
+		!builtin-wxWidgets? ( >=x11-libs/wxGTK-2.9.0 )
 		dev-libs/boost
 		dev-lang/v8
-		dev-util/google-breakpad
+		!builtin-breakpad? ( dev-util/google-breakpad )
 		dev-util/gyp
 		dev-util/depot_tools
-		net-misc/curl[ares]
-		dev-libs/tinyxml"
+		!builtin-curl? ( net-misc/curl[ares] )
+		!builtin-tinyxml? ( dev-libs/tinyxml )"
 		#check svn co http://google-breakpad.googlecode.com/svn/trunk -r 699  breakpad
 		#check svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_0/ wxWidgets
 
