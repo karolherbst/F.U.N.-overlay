@@ -4,7 +4,7 @@
 
 EAPI=3
 
-EGIT_REPO_URI="https://github.com/karolherbst/Desurium.git"
+EGIT_REPO_URI="https://github.com/karolherbst/Desurium"
 
 inherit eutils git-2 cmake-utils
 
@@ -13,7 +13,7 @@ HOMEPAGE="http://subspacebattle.sf.net"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="amd64 x86"
-IUSE="builtin-curl +builtin-tinyxml +builtin-breakpad +builtin-wxWidgets"
+IUSE="builtin-curl builtin-tinyxml +builtin-breakpad +builtin-wxWidgets"
 
 DEPEND=">=sys-devel/gcc-4.5
 		dev-vcs/git
@@ -46,7 +46,7 @@ DEPEND=">=sys-devel/gcc-4.5
 		dev-util/gyp
 		dev-util/depot_tools
 		!builtin-curl? ( net-misc/curl[ares] )
-		!builtin-tinyxml? ( dev-libs/tinyxml )"
+		!builtin-tinyxml? ( dev-libs/tinyxml[-stl] )"
 		#check svn co http://google-breakpad.googlecode.com/svn/trunk -r 699  breakpad
 		#check svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_0/ wxWidgets
 
