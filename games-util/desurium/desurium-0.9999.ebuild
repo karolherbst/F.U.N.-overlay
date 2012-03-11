@@ -6,10 +6,10 @@ EAPI=3
 
 EGIT_REPO_URI="https://github.com/karolherbst/Desurium"
 
-inherit eutils git-2 cmake-utils
+inherit eutils cmake-utils git-2
 
 DESCRIPTION="Free software version of Desura game client"
-HOMEPAGE="http://subspacebattle.sf.net"
+HOMEPAGE="https://github.com/karolherbst/Desurium"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="amd64 x86"
