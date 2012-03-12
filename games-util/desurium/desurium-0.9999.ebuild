@@ -30,7 +30,6 @@ DEPEND=">=sys-devel/gcc-4.5
 		>=dev-libs/dbus-glib-0.92
 		>=dev-util/gperf-3.0.4
 		sys-devel/bison
-		net-print/libgnomecups
 		sys-devel/flex
 		virtual/jpeg
 		media-libs/alsa-lib
@@ -43,10 +42,11 @@ DEPEND=">=sys-devel/gcc-4.5
 		dev-libs/boost
 		dev-lang/v8
 		!builtin-breakpad? ( dev-util/google-breakpad )
-		dev-util/gyp
-		dev-util/depot_tools
 		!builtin-curl? ( net-misc/curl[ares] )
 		!builtin-tinyxml? ( dev-libs/tinyxml[-stl] )"
+#		net-print/libgnomecups
+#		dev-util/gyp
+#		dev-util/depot_tools
 		#check svn co http://google-breakpad.googlecode.com/svn/trunk -r 699  breakpad
 		#check svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_0/ wxWidgets
 
