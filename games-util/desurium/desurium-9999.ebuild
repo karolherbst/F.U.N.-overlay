@@ -15,33 +15,18 @@ SLOT="0"
 KEYWORDS="amd64 x86"
 IUSE="builtin-curl builtin-tinyxml +builtin-breakpad +builtin-wxWidgets"
 
-DEPEND="dev-vcs/subversion
-	sys-devel/m4
-	sys-devel/binutils
-	sys-devel/automake
-	sys-devel/autoconf
-	sys-devel/libtool
-	>=x11-libs/gtk+-2.24
-	>=dev-libs/nss-3.12
-	>=gnome-base/gconf-2.32
-	gnome-base/libgnome-keyring
-	>=dev-libs/dbus-glib-0.92
-	>=dev-util/gperf-3.0.4
-	sys-devel/bison
-	sys-devel/flex
-	virtual/jpeg
-	media-libs/alsa-lib
+DEPEND="
 	app-arch/bzip2
-	x11-libs/libXpm
-	x11-libs/libX11
-	dev-libs/openssl
-	dev-util/scons
-	!builtin-wxWidgets? ( >=x11-libs/wxGTK-2.9.0 )
+    dev-db/sqlite
 	dev-libs/boost
+	dev-libs/openssl
+	!builtin-tinyxml? ( dev-libs/tinyxml[-stl] )
 	dev-lang/v8
 	!builtin-breakpad? ( dev-util/google-breakpad )
+    dev-vcs/subversion
 	!builtin-curl? ( net-misc/curl[ares] )
-	!builtin-tinyxml? ( dev-libs/tinyxml[-stl] )"
+	>=x11-libs/gtk+-2.24"
+#	!builtin-wxWidgets? ( >=x11-libs/wxGTK-2.9.0 )
 #	net-print/libgnomecups
 #	dev-util/gyp
 #	dev-util/depot_tools
