@@ -13,11 +13,20 @@ TOCDEPEND="
 # tocenv should not be depend on itselfs
 [[ ${PN} = tocenv ]] || TOCDEPEND+=" dev-util/tocenv "
 
+if [[ ${PV} == "9999" ]] ; then
+    EGIT_REPO_URI="git://github.com/karolherbst/${PN}.git"
+    inherit git-2
+    KEYWORDS=""
+else
+    MY_P="${PN}-${PV}"
+    SRC_URI="https://github.com/downloads/karolherbst/${PN}/${PF}.tar.gz"
+    S=${WORKDIR}/${MY_P}
+    KEYWORDS="~amd64"
+fi
+
 DEPEND="${TOCDEPEND}"
-HOMEPAGE="http://karolherbst.de/toc/${PN}.html"
-KEYWORDS="~amd64"
+HOMEPAGE="https://github.com/karolherbst/${PN}"
 RDEPEND="${DEPEND}"
-SRC_URI="https://github.com/karolherbst/${PN}/tarball/${PV}"
 SLOT="0"
 IUSE="c++0x pch"
 
