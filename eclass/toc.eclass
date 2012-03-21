@@ -1,3 +1,7 @@
+# Copyright 1999-2012 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License, v2 or later
+# @author: Karol Herbst <projects@karolherbst.de>
+
 inherit cmake-utils
 
 EAPI="2"
@@ -13,7 +17,7 @@ DEPEND="${TOCDEPEND}"
 HOMEPAGE="http://karolherbst.de/toc/${PN}.html"
 KEYWORDS="~amd64"
 RDEPEND="${DEPEND}"
-SRC_URI="http://karolherbst.de/toc/archives/${PN}/${PN}-${PV}.tar.gz"
+SRC_URI="https://github.com/karolherbst/${PN}/tarball/${PV}"
 SLOT="0"
 IUSE="c++0x pch"
 
