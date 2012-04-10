@@ -1,6 +1,6 @@
 # Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/x11-drivers/nvidia-drivers/nvidia-drivers-295.33.ebuild,v 1.4 2012/04/06 06:46:14 cardoe Exp $
+# $Header: /var/cvsroot/gentoo-x86/x11-drivers/nvidia-drivers/nvidia-drivers-290.10-r2.ebuild,v 1.1 2012/02/15 09:53:34 xarthisius Exp $
 
 EAPI="2"
 
@@ -23,11 +23,12 @@ IUSE="acpi custom-cflags gtk multilib kernel_linux"
 RESTRICT="strip"
 EMULTILIB_PKG="true"
 
-COMMON="<x11-base/xorg-server-1.12.99
+COMMON="<x11-base/xorg-server-1.11.99
 	kernel_linux? ( >=sys-libs/glibc-2.6.1 )
 	multilib? ( app-emulation/emul-linux-x86-xlibs )
 	>=app-admin/eselect-opengl-1.0.9
-	app-admin/eselect-opencl"
+	app-admin/eselect-opencl
+	!<media-video/nvidia-settings-256.52"
 DEPEND="${COMMON}
 	kernel_linux? ( virtual/linux-sources )"
 RDEPEND="${COMMON}
@@ -93,14 +94,13 @@ QA_EXECSTACK_amd64="usr/lib32/libnvidia-glcore.so.${PV}
 	usr/lib64/libnvidia-glcore.so.${PV}
 	usr/lib64/opengl/nvidia/extensions/libglx.so.${PV}
 	usr/lib64/libXvMCNVIDIA.so.${PV}
-	usr/lib64/libcuda.so.${PV}
-	usr/lib64/OpenCL/vendors/nvidia/libOpenCL.so.1.0.0
+	usr/lib64/OpenCL/vendors/nvidia/libcuda.so.${PV}
+	usr/lib64/libOpenCL.so.1.0.0
 	usr/lib64/libnvidia-compiler.so.${PV}
 	usr/lib64/xorg/modules/drivers/nvidia_drv.so
-	opt/bin/nvidia-smi
-	opt/bin/nvidia-xconfig
-	opt/bin/nvidia-debugdump
-	opt/bin/nvidia-settings"
+	usr/bin/nvidia-smi
+	usr/bin/nvidia-xconfig
+	usr/bin/nvidia-settings"
 
 QA_WX_LOAD_x86="usr/lib/libnvidia-glcore.so.${PV}
 	usr/lib/opengl/nvidia/lib/libGL.so.${PV}
@@ -140,10 +140,9 @@ QA_DT_HASH_amd64="usr/lib32/libcuda.so.${PV}
 	usr/lib64/OpenCL/vendors/nvidia/libOpenCL.so.1.0.0
 	usr/lib64/libnvidia-compiler.so.${PV}
 	usr/lib64/libnvcuvid.so.${PV}
-	opt/bin/nvidia-smi
-	opt/bin/nvidia-xconfig
-	opt/bin/nvidia-debugdump
-	opt/bin/nvidia-settings"
+	usr/bin/nvidia-smi
+	usr/bin/nvidia-xconfig
+	usr/bin/nvidia-settings"
 
 QA_DT_HASH_x86="usr/lib/libcuda.so.${PV}
 	usr/lib/libnvidia-cfg.so.${PV}
@@ -158,10 +157,9 @@ QA_DT_HASH_x86="usr/lib/libcuda.so.${PV}
 	usr/lib/OpenCL/vendors/nvidia/libOpenCL.so.1.0.0
 	usr/lib/libnvidia-compiler.so.${PV}
 	usr/lib/libnvcuvid.so.${PV}
-	opt/bin/nvidia-smi
-	opt/bin/nvidia-xconfig
-	opt/bin/nvidia-debugdump
-	opt/bin/nvidia-settings"
+	usr/bin/nvidia-smi
+	usr/bin/nvidia-xconfig
+	usr/bin/nvidia-settings"
 
 S=${WORKDIR}/
 
@@ -213,11 +211,6 @@ pkg_setup() {
 		MODULE_NAMES="nvidia(video:${S}/kernel)"
 		BUILD_PARAMS="IGNORE_CC_MISMATCH=yes V=1 SYSSRC=${KV_DIR} \
 		SYSOUT=${KV_OUT_DIR} CC=$(tc-getBUILD_CC)"
-		# linux-mod_src_compile calls set_arch_to_kernel, which
-		# sets the ARCH to x86 but NVIDIA's wrapping Makefile
-		# expects x86_64 or i386 and then converts it to x86
-		# later on in the build process
-		BUILD_FIXES="ARCH=$(uname -m | sed -e 's/i.86/i386/')"
 		mtrr_check
 		lockdep_check
 	fi
@@ -290,6 +283,8 @@ src_prepare() {
 			-e 's:-Wsign-compare::g' \
 			"${NV_SRC}"/Makefile.kbuild
 
+		epatch "${FILESDIR}"/256.35-unified-arch.patch
+
 		# If you set this then it's your own fault when stuff breaks :)
 		use custom-cflags && sed -i "s:-O:${CFLAGS}:" "${NV_SRC}"/Makefile.*
 
@@ -332,13 +327,6 @@ src_install() {
 			"${WORKDIR}"/nvidia
 		insinto /etc/modprobe.d
 		newins "${WORKDIR}"/nvidia nvidia.conf || die
-
-		# Ensures that our device nodes are created when not using X
-		exeinto /lib/udev
-		doexe "${FILESDIR}"/nvidia-udev.sh
-
-		insinto /lib/udev/rules.d
-		newins "${FILESDIR}"/nvidia.udev-rule 99-nvidia.rules
 	elif use x86-fbsd; then
 		insinto /boot/modules
 		doins "${WORKDIR}/${NV_PACKAGE}/src/nvidia.kld" || die
@@ -425,23 +413,21 @@ src_install() {
 	fi
 
 	# Helper Apps
-	exeinto /opt/bin/
-	doexe ${NV_EXEC}/nvidia-xconfig || die
-	doexe ${NV_EXEC}/nvidia-debugdump || die
+	dobin ${NV_EXEC}/nvidia-xconfig || die
 	if use gtk; then
-		doexe ${NV_EXEC}/nvidia-settings || die
+		dobin ${NV_EXEC}/nvidia-settings || die
 	fi
-	doexe ${NV_EXEC}/nvidia-bug-report.sh || die
+	dobin ${NV_EXEC}/nvidia-bug-report.sh || die
 	if use kernel_linux; then
-		doexe ${NV_EXEC}/nvidia-smi || die
+		dobin ${NV_EXEC}/nvidia-smi || die
 	fi
 
 	# Desktop entries for nvidia-settings
 	if use gtk; then
-		sed -e 's:__UTILS_PATH__:/opt/bin:' \
+		sed -e 's:__UTILS_PATH__:/usr/bin:' \
 			-e 's:__PIXMAP_PATH__:/usr/share/pixmaps:' \
 			-i "${NV_EXEC}/nvidia-settings.desktop"
-		newmenu ${NV_EXEC}/nvidia-settings.desktop nvidia-settings-opt.desktop
+		domenu ${NV_EXEC}/nvidia-settings.desktop
 
 		doicon ${NV_EXEC}/nvidia-settings.png
 	fi
@@ -516,7 +502,9 @@ src_install-libs() {
 }
 
 pkg_preinst() {
-	use kernel_linux && linux-mod_pkg_preinst
+	if use kernel_linux; then
+		linux-mod_pkg_postinst
+	fi
 
 	# Clean the dynamic libGL stuff's home to ensure
 	# we dont have stale libs floating around
@@ -530,11 +518,13 @@ pkg_preinst() {
 }
 
 pkg_postinst() {
-	use kernel_linux && linux-mod_pkg_postinst
+	if use kernel_linux; then
+		linux-mod_pkg_postinst
+	fi
 
 	# Switch to the nvidia implementation
-	"${ROOT}"/usr/bin/eselect opengl set --use-old nvidia
-	"${ROOT}"/usr/bin/eselect opencl set --use-old nvidia
+	eselect opengl set --use-old nvidia
+	eselect opencl set --use-old nvidia
 
 	echo
 	elog "You must be in the video group to use the NVIDIA device"
@@ -552,7 +542,7 @@ pkg_postinst() {
 	elog "To use the NVIDIA CUDA/OpenCL, run \"eselect opencl set nvidia\""
 	elog
 	elog "NVIDIA has requested that any bug reports submitted have the"
-	elog "output of /opt/bin/nvidia-bug-report.sh included."
+	elog "output of /usr/bin/nvidia-bug-report.sh included."
 	elog
 	elog "To work with compiz, you must enable the AddARGBGLXVisuals option."
 	elog
@@ -568,11 +558,9 @@ pkg_postinst() {
 	fi
 }
 
-pkg_prerm() {
-	"${ROOT}"/usr/bin/eselect opengl set --use-old xorg-x11
-}
-
 pkg_postrm() {
-	use kernel_linux && linux-mod_pkg_postrm
-	"${ROOT}"/usr/bin/eselect opengl set --use-old xorg-x11
+	if use kernel_linux; then
+		linux-mod_pkg_postrm
+	fi
+	eselect opengl set --use-old xorg-x11
 }

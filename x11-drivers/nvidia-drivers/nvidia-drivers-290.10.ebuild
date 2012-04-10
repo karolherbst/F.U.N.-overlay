@@ -1,10 +1,10 @@
-# Copyright 1999-2011 Gentoo Foundation
+# Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/x11-drivers/nvidia-drivers/nvidia-drivers-290.10.ebuild,v 1.2 2011/12/16 08:47:09 ago Exp $
+# $Header: /var/cvsroot/gentoo-x86/x11-drivers/nvidia-drivers/nvidia-drivers-290.10.ebuild,v 1.5 2012/02/05 07:42:05 vapier Exp $
 
 EAPI="2"
 
-inherit eutils multilib versionator linux-mod flag-o-matic nvidia-driver
+inherit eutils unpacker multilib portability versionator linux-mod flag-o-matic nvidia-driver
 
 X86_NV_PACKAGE="NVIDIA-Linux-x86-${PV}"
 AMD64_NV_PACKAGE="NVIDIA-Linux-x86_64-${PV}"
@@ -18,7 +18,7 @@ SRC_URI="x86? ( http://us.download.nvidia.com/XFree86/Linux-x86/${PV}/${X86_NV_P
 
 LICENSE="NVIDIA"
 SLOT="0"
-KEYWORDS="-* amd64 ~x86 ~x86-fbsd"
+KEYWORDS="-* amd64 x86 ~x86-fbsd"
 IUSE="acpi custom-cflags gtk multilib kernel_linux"
 RESTRICT="strip"
 EMULTILIB_PKG="true"
@@ -271,8 +271,8 @@ src_unpack() {
 }
 
 src_prepare() {
-	#dirty hacky hack
-	sed -i /MODULE_LICENSE\(/'s/".*"/"GPL"/' kernel/nv.c
+        #dirty hacky hack
+        sed -i /MODULE_LICENSE\(/'s/".*"/"GPL"/' kernel/nv.c
 	# Please add a brief description for every added patch
 	use x86-fbsd && cd doc
 

@@ -1,6 +1,102 @@
 # ChangeLog for x11-drivers/nvidia-drivers
-# Copyright 1999-2011 Gentoo Foundation; Distributed under the GPL v2
-# $Header: /var/cvsroot/gentoo-x86/x11-drivers/nvidia-drivers/ChangeLog,v 1.313 2011/12/16 08:47:09 ago Exp $
+# Copyright 1999-2012 Gentoo Foundation; Distributed under the GPL v2
+# $Header: /var/cvsroot/gentoo-x86/x11-drivers/nvidia-drivers/ChangeLog,v 1.330 2012/04/06 18:20:46 cardoe Exp $
+
+  06 Apr 2012; Doug Goldstein <cardoe@gentoo.org> files/nvidia.udev-rule:
+  Break the udev rule into two pieces because a user on bug #376527 had a
+  problem with the combined rule on udev-171-r5. It worked fine after he
+  recompiled udev but obviously since there was an issue we should just use it
+  broken out. bug #376527
+
+  06 Apr 2012; Doug Goldstein <cardoe@gentoo.org> nvidia-drivers-295.33.ebuild:
+  Script needs to be executable
+
+  06 Apr 2012; Doug Goldstein <cardoe@gentoo.org> nvidia-drivers-295.33.ebuild,
+  +files/nvidia.udev-rule, +files/nvidia-udev.sh:
+  Add support for creating device nodes for NVIDIA graphics cards when not
+  using X. Users of CUDA only specificially need this. Work for this done by
+  Rick Farina <sidhayn@gmail.com> bug #376527
+
+  26 Mar 2012; Doug Goldstein <cardoe@gentoo.org> nvidia-drivers-295.33.ebuild:
+  ebuild updates that were meant to be committed part of the original commit.
+
+*nvidia-drivers-295.33 (23 Mar 2012)
+
+  23 Mar 2012; Doug Goldstein <cardoe@gentoo.org>
+  +nvidia-drivers-295.33.ebuild:
+  Version bump. Move the binaries from /usr/bin to /opt/bin.
+
+  21 Mar 2012; Samuli Suominen <ssuominen@gentoo.org>
+  nvidia-drivers-295.20-r1.ebuild:
+  Use $OUTPUT instead of $SOURCES for the generated headers wrt #408841,
+  Comment #10 by Ingo Kemper
+
+  21 Mar 2012; Samuli Suominen <ssuominen@gentoo.org>
+  nvidia-drivers-295.20-r1.ebuild:
+  Fix building with Linux 3.3.x wrt #408841
+
+  20 Mar 2012; Agostino Sarubbo <ago@gentoo.org>
+  nvidia-drivers-295.20-r1.ebuild:
+  Stable for amd64, wrt bug #408905
+
+  19 Mar 2012; Doug Goldstein <cardoe@gentoo.org>
+  nvidia-drivers-295.20-r1.ebuild:
+  The 295.20 drivers are compatible with xorg-server-1.12.
+
+*nvidia-drivers-290.10-r2 (15 Feb 2012)
+*nvidia-drivers-295.20-r1 (15 Feb 2012)
+
+  15 Feb 2012; Kacper Kowalik <xarthisius@gentoo.org>
+  +nvidia-drivers-290.10-r2.ebuild, +nvidia-drivers-295.20-r1.ebuild,
+  -nvidia-drivers-290.10-r1.ebuild, -nvidia-drivers-295.20.ebuild:
+  Move libcuda and libnvidia-compiler back to /usr/lib since they're not
+  creating any conflicts now. That will allow to use CUDA without explicit
+  eselect opencl. Fixes bug 403495 by Michal Januszewski <spock@gentoo.org>
+
+*nvidia-drivers-295.20 (14 Feb 2012)
+
+  14 Feb 2012; Doug Goldstein <cardoe@gentoo.org>
+  +nvidia-drivers-295.20.ebuild:
+  Version bump
+
+*nvidia-drivers-275.43 (14 Feb 2012)
+
+  14 Feb 2012; Doug Goldstein <cardoe@gentoo.org>
+  -nvidia-drivers-275.28.ebuild, -nvidia-drivers-275.36.ebuild,
+  +nvidia-drivers-275.43.ebuild, -nvidia-drivers-285.05.09-r1.ebuild,
+  -nvidia-drivers-290.06.ebuild:
+  Remove old versions and bump the long lived stable version
+
+  07 Feb 2012; Kacper Kowalik <xarthisius@gentoo.org>
+  nvidia-drivers-290.10-r1.ebuild:
+  Run eselect opencl during pkg_postinst wrt bug 402407 by Benjamin Schindler
+  <bschindler@student.ethz.ch> Add missing files to QA_* though some warnigs
+  still slip through
+
+  05 Feb 2012; Mike Frysinger <vapier@gentoo.org>
+  nvidia-drivers-96.43.20.ebuild, nvidia-drivers-173.14.31.ebuild,
+  nvidia-drivers-275.09.07.ebuild, nvidia-drivers-275.28.ebuild,
+  nvidia-drivers-275.36.ebuild, nvidia-drivers-285.05.09-r1.ebuild,
+  nvidia-drivers-290.06.ebuild, nvidia-drivers-290.10.ebuild,
+  nvidia-drivers-290.10-r1.ebuild:
+  Move to new unpacker eclass for unpack_makeself.
+
+*nvidia-drivers-290.10-r1 (04 Feb 2012)
+
+  04 Feb 2012; Kacper Kowalik <xarthisius@gentoo.org>
+  +nvidia-drivers-290.10-r1.ebuild, metadata.xml:
+  Add revbump that installs OpenCL related libraries in place that doesn't
+  create conflicts and is expected by app-admin/opencl
+
+  18 Jan 2012; Ulrich Müller <ulm@gentoo.org> nvidia-drivers-96.43.20.ebuild,
+  nvidia-drivers-173.14.31.ebuild, nvidia-drivers-275.09.07.ebuild,
+  nvidia-drivers-275.28.ebuild, nvidia-drivers-275.36.ebuild,
+  nvidia-drivers-285.05.09-r1.ebuild, nvidia-drivers-290.06.ebuild,
+  nvidia-drivers-290.10.ebuild:
+  Inherit portability.eclass wrt bug 398801.
+
+  26 Dec 2011; Markus Meier <maekke@gentoo.org> nvidia-drivers-290.10.ebuild:
+  x86 stable, bug #394399
 
   16 Dec 2011; Agostino Sarubbo <ago@gentoo.org> nvidia-drivers-290.10.ebuild:
   Stable for AMD64, wrt bug #394399
