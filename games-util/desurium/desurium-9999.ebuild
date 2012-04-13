@@ -1,31 +1,40 @@
-# Copyright 1999-2009 Gentoo Foundation
+# Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
 EAPI=3
 
-EGIT_REPO_URI="https://github.com/karolherbst/Desurium"
+inherit cmake-utils eutils git-2 games
 
-inherit eutils cmake-utils git-2
-
+EGIT_REPO_URI="git://github.com/Jookia/Desurium.git"
 DESCRIPTION="Free software version of Desura game client"
-HOMEPAGE="https://github.com/karolherbst/Desurium"
+HOMEPAGE="https://github.com/lodle/Desurium"
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="amd64 x86"
-IUSE="builtin-curl builtin-tinyxml +builtin-breakpad +builtin-wxWidgets"
+KEYWORDS="~amd64 ~x86"
+IUSE="+bin-cef builtin-curl builtin-tinyxml debug"
 
 DEPEND="
 	app-arch/bzip2
-    dev-db/sqlite
+	dev-db/sqlite
 	dev-libs/boost
 	dev-libs/openssl
-	!builtin-tinyxml? ( dev-libs/tinyxml[-stl] )
+	!builtin-tinyxml? (
+		|| ( <dev-libs/tinyxml-2.6.2-r2[-stl]
+		     >=dev-libs/tinyxml-2.6.2-r2
+		)
+	)
 	dev-lang/v8
-	!builtin-breakpad? ( dev-util/google-breakpad )
-    dev-vcs/subversion
-	!builtin-curl? ( net-misc/curl[ares] )
-	>=x11-libs/gtk+-2.24"
+	dev-vcs/subversion
+	!builtin-curl? (
+		net-misc/curl
+	)
+	builtin-curl? (
+		net-dns/c-ares
+	)
+	>=sys-devel/gcc-4.5
+	>=x11-libs/gtk+-2.24
+	x11-libs/libnotify"
 #	!builtin-wxWidgets? ( >=x11-libs/wxGTK-2.9.0 )
 #	net-print/libgnomecups
 #	dev-util/gyp
@@ -36,12 +45,28 @@ DEPEND="
 
 RDEPEND="${DEPEND}"
 
-S="${WORKDIR}/desurium"
+S="${WORKDIR}/desura"
 
 src_configure() {
-	mycmakeargs="
-        cmake-utils_use_with	builtin-curl      ARES
-	"
+	mycmakeargs=(
+		$(cmake-utils_use bin-cef BUILD_CEF)
+		$(cmake-utils_use_with builtin-curl ARES)
+		$(cmake-utils_use debug DEBUG)
+		-DCMAKE_INSTALL_PREFIX=${GAMES_PREFIX}/${PN}
+	)
 	cmake-utils_src_configure
 }
 
+src_compile() {
+	cmake-utils_src_compile
+}
+
+src_install() {
+	cmake-utils_src_install
+
+	dogamesbin ${FILESDIR}/launch-desura.sh
+	doicon ${FILESDIR}/desura.png
+	make_desktop_entry "launch-desura.sh" "Desurium" "desura"
+
+	prepgamesdirs
+}
