@@ -6,7 +6,7 @@ EAPI=3
 
 inherit cmake-utils eutils git-2 games
 
-EGIT_REPO_URI="git://github.com/Jookia/Desurium.git"
+EGIT_REPO_URI="git://github.com/lodle/Desurium.git"
 DESCRIPTION="Free software version of Desura game client"
 HOMEPAGE="https://github.com/lodle/Desurium"
 LICENSE="GPL-3"
