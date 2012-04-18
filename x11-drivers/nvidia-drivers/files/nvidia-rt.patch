@@ -11,15 +11,6 @@ Index: kernel/conftest.sh
  
      test_xen
  
-@@ -126,7 +126,7 @@
-     CFLAGS="$BASE_CFLAGS $MACH_CFLAGS $OUTPUT_CFLAGS -I$HEADERS $AUTOCONF_CFLAGS"
- 
-     if [ "$ARCH" = "i386" -o "$ARCH" = "x86_64" ]; then
--        CFLAGS="$CFLAGS -I$SOURCES/arch/x86/include -I$SOURCES/arch/x86/include/generated"
-+        CFLAGS="$CFLAGS -I$SOURCES/arch/x86/include -I$OUTPUT/arch/x86/include/generated"
-     elif [ "$ARCH" = "ARMv7" ]; then
-         CFLAGS="$CFLAGS -I$SOURCES/arch/arm/include -I$SOURCES/arch/arm/include/generated"
-     fi
 @@ -512,7 +512,12 @@
              # and if it as an 'event' member.
              #
@@ -52,7 +43,7 @@ Index: kernel/conftest.sh
  
              echo "$CONFTEST_PREAMBLE
              #include <linux/acpi.h>
-+	    #include <acpi/acpixf.h>
++            #include <acpi/acpixf.h>
              void conftest_acpi_walk_namespace(void) {
                  acpi_walk_namespace(0, NULL, 0, NULL, NULL, NULL, NULL);
              }" > conftest$$.c
@@ -69,7 +60,7 @@ Index: kernel/conftest.sh
              fi
          fi
 +
-+	RET=0
++        RET=0
 +	SELECTED_MAKEFILE=Makefile.kbuild
  
          if [ "$RET" = "0" ]; then
@@ -129,39 +120,3 @@ Index: kernel/nv-linux.h
  #else
  #if !defined(__SEMAPHORE_INITIALIZER) && defined(__COMPAT_SEMAPHORE_INITIALIZER)
  #define __SEMAPHORE_INITIALIZER __COMPAT_SEMAPHORE_INITIALIZER
-Index: kernel/nv-mmap.c
-===================================================================
---- kernel/nv-mmap.c.orig
-+++ kernel/nv-mmap.c
-@@ -257,6 +257,12 @@
- 
-     if (IS_REG_OFFSET(nv, NV_VMA_OFFSET(vma), NV_VMA_SIZE(vma)))
-     {
-+        if (IS_BLACKLISTED_REG_OFFSET(nv, NV_VMA_OFFSET(vma), NV_VMA_SIZE(vma)))
-+        {
-+            status = -EINVAL;
-+            goto done;
-+        }
-+
-         if (nv_encode_caching(&vma->vm_page_prot,
-                               NV_MEMORY_UNCACHED,
-                               NV_MEMORY_TYPE_REGISTERS))
-Index: kernel/nv.h
-===================================================================
---- kernel/nv.h.orig
-+++ kernel/nv.h
-@@ -442,6 +442,14 @@
-              ((offset) >= (nv)->agp.address) &&                                \
-              (((offset) + ((length)-1)) <= (nv)->agp.address + ((nv)->agp.size-1)))
- 
-+#define IS_REG_RANGE_WITHIN_MAPPING(nv, roffset, rlength, moffset, mlength)    \
-+             (((moffset) <= ((nv)->regs->address + ((roffset) + (rlength)-1))) &&\
-+             (((moffset) + (mlength)-1) >= ((nv)->regs->address + (roffset))))
-+
-+#define IS_BLACKLISTED_REG_OFFSET(nv, offset, length)                          \
-+             ((IS_REG_RANGE_WITHIN_MAPPING(nv, 0x1000, 0x1000, offset, length)) ||\
-+             (IS_REG_RANGE_WITHIN_MAPPING(nv, 0x700000, 0x100000, offset, length)))
-+
- /* duplicated from nvos.h for external builds */
- #ifndef NVOS_AGP_CONFIG_DISABLE_AGP
- #  define NVOS_AGP_CONFIG_DISABLE_AGP (0x00000000)
