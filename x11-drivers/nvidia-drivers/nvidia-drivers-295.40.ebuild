@@ -19,7 +19,7 @@ SRC_URI="x86? ( http://us.download.nvidia.com/XFree86/Linux-x86/${PV}/${X86_NV_P
 LICENSE="NVIDIA"
 SLOT="0"
 KEYWORDS="-* ~amd64 ~x86 ~x86-fbsd"
-IUSE="acpi custom-cflags gtk multilib kernel_linux"
+IUSE="acpi custom-cflags gtk multilib kernel_linux realtime"
 RESTRICT="strip"
 EMULTILIB_PKG="true"
 
@@ -279,8 +279,11 @@ src_unpack() {
 }
 
 src_prepare() {
-        #dirty hacky hack
-        sed -i /MODULE_LICENSE\(/'s/".*"/"GPL"/' kernel/nv.c
+	if use realtime; then
+		epatch "${FILESDIR}"/nvidia-rt.patch
+        	#dirty hacky hack
+        	sed -i /MODULE_LICENSE\(/'s/".*"/"GPL"/' kernel/nv.c
+	fi
 	# Please add a brief description for every added patch
 	use x86-fbsd && cd doc
 

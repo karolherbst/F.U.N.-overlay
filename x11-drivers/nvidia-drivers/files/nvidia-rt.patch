@@ -1,0 +1,165 @@
+--- kernel/conftest.sh.orig
++++ kernel/conftest.sh
+@@ -95,7 +95,7 @@
+         fi
+     fi
+ 
+-    CFLAGS="$CFLAGS $OUTPUT_CFLAGS -I$HEADERS $AUTOCONF_CFLAGS"
++    CFLAGS="$CFLAGS $OUTPUT_CFLAGS -I$HEADERS -I$OUTPUT/arch/x86/include/generated $AUTOCONF_CFLAGS"
+ 
+     test_xen
+ 
+@@ -126,7 +126,7 @@
+     CFLAGS="$BASE_CFLAGS $MACH_CFLAGS $OUTPUT_CFLAGS -I$HEADERS $AUTOCONF_CFLAGS"
+ 
+     if [ "$ARCH" = "i386" -o "$ARCH" = "x86_64" ]; then
+-        CFLAGS="$CFLAGS -I$SOURCES/arch/x86/include -I$SOURCES/arch/x86/include/generated"
++        CFLAGS="$CFLAGS -I$SOURCES/arch/x86/include -I$OUTPUT/arch/x86/include/generated"
+     elif [ "$ARCH" = "ARMv7" ]; then
+         CFLAGS="$CFLAGS -I$SOURCES/arch/arm/include -I$SOURCES/arch/arm/include/generated"
+     fi
+@@ -512,7 +512,12 @@
+             # and if it as an 'event' member.
+             #
+             echo "$CONFTEST_PREAMBLE
+-            #include <asm/system.h>
++            #include <linux/version.h>
++	    #if LINUX_VERSION_CODE > KERNEL_VERSION(3, 3, 0)
++	      #include <asm/switch_to.h>
++	    #else
++	      #include <asm/system.h>
++	    #endif
+             #include <linux/pm.h>
+             void conftest_pm_message_t(pm_message_t state) {
+                 pm_message_t *p = &state;
+@@ -965,11 +970,12 @@
+             #
+             echo "$CONFTEST_PREAMBLE
+             #include <linux/acpi.h>
++            #include <acpi/acpixf.h>
+             void conftest_acpi_walk_namespace(void) {
+                 acpi_walk_namespace();
+             }" > conftest$$.c
+ 
+-            $CC $CFLAGS -c conftest$$.c > /dev/null 2>&1
++            #CC $CFLAGS -c conftest$$.c > /dev/null 2>&1
+             rm -f conftest$$.c
+ 
+             if [ -f conftest$$.o ]; then
+@@ -980,6 +986,7 @@
+ 
+             echo "$CONFTEST_PREAMBLE
+             #include <linux/acpi.h>
++	    #include <acpi/acpixf.h>
+             void conftest_acpi_walk_namespace(void) {
+                 acpi_walk_namespace(0, NULL, 0, NULL, NULL, NULL, NULL);
+             }" > conftest$$.c
+@@ -996,6 +1003,7 @@
+ 
+             echo "$CONFTEST_PREAMBLE
+             #include <linux/acpi.h>
++            #include <acpi/acpixf.h>
+             void conftest_acpi_walk_namespace(void) {
+                 acpi_walk_namespace(0, NULL, 0, NULL, NULL, NULL);
+             }" > conftest$$.c
+@@ -1603,6 +1611,9 @@
+                 fi
+             fi
+         fi
++
++	RET=0
++	SELECTED_MAKEFILE=Makefile.kbuild
+ 
+         if [ "$RET" = "0" ]; then
+             ln -s $SELECTED_MAKEFILE Makefile
+Index: kernel/nv-linux.h
+===================================================================
+--- kernel/nv-linux.h.orig
++++ kernel/nv-linux.h
+@@ -111,7 +111,11 @@
+ #include <linux/timer.h>
+ 
+ #include <asm/div64.h>              /* do_div()                         */
++#if LINUX_VERSION_CODE > KERNEL_VERSION(3, 3, 0)
++#include <asm/switch_to.h>
++#else
+ #include <asm/system.h>             /* cli, sli, save_flags             */
++#endif
+ #include <asm/io.h>                 /* ioremap, virt_to_phys            */
+ #include <asm/uaccess.h>            /* access_ok                        */
+ #include <asm/page.h>               /* PAGE_OFFSET                      */
+@@ -291,17 +295,17 @@
+ #endif
+ #endif
+ 
+-#if defined(CONFIG_PREEMPT_RT)
+-typedef atomic_spinlock_t         nv_spinlock_t;
+-#define NV_SPIN_LOCK_INIT(lock)   atomic_spin_lock_init(lock)
+-#define NV_SPIN_LOCK_IRQ(lock)    atomic_spin_lock_irq(lock)
+-#define NV_SPIN_UNLOCK_IRQ(lock)  atomic_spin_unlock_irq(lock)
+-#define NV_SPIN_LOCK_IRQSAVE(lock,flags) atomic_spin_lock_irqsave(lock,flags)
++#if defined(CONFIG_PREEMPT_RT_FULL)
++typedef raw_spinlock_t            nv_spinlock_t;
++#define NV_SPIN_LOCK_INIT(lock)   raw_spin_lock_init(lock)
++#define NV_SPIN_LOCK_IRQ(lock)    raw_spin_lock_irq(lock)
++#define NV_SPIN_UNLOCK_IRQ(lock)  raw_spin_unlock_irq(lock)
++#define NV_SPIN_LOCK_IRQSAVE(lock,flags) raw_spin_lock_irqsave(lock,flags)
+ #define NV_SPIN_UNLOCK_IRQRESTORE(lock,flags) \
+-  atomic_spin_unlock_irqrestore(lock,flags)
+-#define NV_SPIN_LOCK(lock)        atomic_spin_lock(lock)
+-#define NV_SPIN_UNLOCK(lock)      atomic_spin_unlock(lock)
+-#define NV_SPIN_UNLOCK_WAIT(lock) atomic_spin_unlock_wait(lock)
++  raw_spin_unlock_irqrestore(lock,flags)
++#define NV_SPIN_LOCK(lock)        raw_spin_lock(lock)
++#define NV_SPIN_UNLOCK(lock)      raw_spin_unlock(lock)
++#define NV_SPIN_UNLOCK_WAIT(lock) raw_spin_unlock_wait(lock)
+ #else
+ typedef spinlock_t                nv_spinlock_t;
+ #define NV_SPIN_LOCK_INIT(lock)   spin_lock_init(lock)
+@@ -956,8 +960,8 @@
+     return ret;
+ }
+ 
+-#if defined(CONFIG_PREEMPT_RT)
+-#define NV_INIT_MUTEX(mutex) semaphore_init(mutex)
++#if defined(CONFIG_PREEMPT_RT_FULL)
++#define NV_INIT_MUTEX(mutex) sema_init(mutex,1)
+ #else
+ #if !defined(__SEMAPHORE_INITIALIZER) && defined(__COMPAT_SEMAPHORE_INITIALIZER)
+ #define __SEMAPHORE_INITIALIZER __COMPAT_SEMAPHORE_INITIALIZER
+Index: kernel/nv-mmap.c
+===================================================================
+--- kernel/nv-mmap.c.orig
++++ kernel/nv-mmap.c
+@@ -257,6 +257,12 @@
+ 
+     if (IS_REG_OFFSET(nv, NV_VMA_OFFSET(vma), NV_VMA_SIZE(vma)))
+     {
++        if (IS_BLACKLISTED_REG_OFFSET(nv, NV_VMA_OFFSET(vma), NV_VMA_SIZE(vma)))
++        {
++            status = -EINVAL;
++            goto done;
++        }
++
+         if (nv_encode_caching(&vma->vm_page_prot,
+                               NV_MEMORY_UNCACHED,
+                               NV_MEMORY_TYPE_REGISTERS))
+Index: kernel/nv.h
+===================================================================
+--- kernel/nv.h.orig
++++ kernel/nv.h
+@@ -442,6 +442,14 @@
+              ((offset) >= (nv)->agp.address) &&                                \
+              (((offset) + ((length)-1)) <= (nv)->agp.address + ((nv)->agp.size-1)))
+ 
++#define IS_REG_RANGE_WITHIN_MAPPING(nv, roffset, rlength, moffset, mlength)    \
++             (((moffset) <= ((nv)->regs->address + ((roffset) + (rlength)-1))) &&\
++             (((moffset) + (mlength)-1) >= ((nv)->regs->address + (roffset))))
++
++#define IS_BLACKLISTED_REG_OFFSET(nv, offset, length)                          \
++             ((IS_REG_RANGE_WITHIN_MAPPING(nv, 0x1000, 0x1000, offset, length)) ||\
++             (IS_REG_RANGE_WITHIN_MAPPING(nv, 0x700000, 0x100000, offset, length)))
++
+ /* duplicated from nvos.h for external builds */
+ #ifndef NVOS_AGP_CONFIG_DISABLE_AGP
+ #  define NVOS_AGP_CONFIG_DISABLE_AGP (0x00000000)
