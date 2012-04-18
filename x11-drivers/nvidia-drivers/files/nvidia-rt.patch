@@ -1,3 +1,5 @@
+Index: kernel/conftest.sh
+===================================================================
 --- kernel/conftest.sh.orig
 +++ kernel/conftest.sh
 @@ -95,7 +95,7 @@
