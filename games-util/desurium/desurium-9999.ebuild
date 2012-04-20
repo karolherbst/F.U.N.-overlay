@@ -34,6 +34,7 @@ DEPEND="
 	)
 	>=sys-devel/gcc-4.5
 	>=x11-libs/gtk+-2.24
+	gnome-base/libgnome-keyring
 	x11-libs/libnotify"
 #	!builtin-wxWidgets? ( >=x11-libs/wxGTK-2.9.0 )
 #	net-print/libgnomecups
