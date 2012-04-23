@@ -26,7 +26,7 @@ create_exe_wrappers() {
 	ebegin "creating compiler wrappers"
 
 	for exe in fsi fsc; do
-		make_wrapper ${exe} "mono /usr/$(get_libdir)/${PN}/${exe}.exe" \
+		make_wrapper ${exe} "mono /usr/$(get_libdir)/fsharp/${exe}.exe" \
 			|| die "couldn't create wrapper for ${exe}.exe"
 	done
 
@@ -34,7 +34,7 @@ create_exe_wrappers() {
 }
 
 src_install() {
-	insinto "/usr/$(get_libdir)/${PN}"
+	insinto "/usr/$(get_libdir)/fsharp"
 	doins bin/* || die "installing libraries failed"
 
 	local libname=bin/FSharp.Core.dll
