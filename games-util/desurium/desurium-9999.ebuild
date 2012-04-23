@@ -6,7 +6,10 @@ EAPI=3
 
 inherit check-reqs cmake-utils eutils git-2 games
 
-EGIT_REPO_URI="git://github.com/lodle/Desurium.git"
+EGIT_REPO_URI="git://github.com/karolherbst/Desurium.git"
+EGIT_BRANCH="local"
+CHECKREQS_DISK_BUILD="3G"
+
 DESCRIPTION="Free software version of Desura game client"
 HOMEPAGE="https://github.com/lodle/Desurium"
 LICENSE="GPL-3"
@@ -17,15 +20,23 @@ IUSE="builtin-curl builtin-tinyxml debug"
 DEPEND="
 	app-arch/bzip2
 	dev-db/sqlite
+	dev-lang/yasm
 	dev-libs/boost
+	dev-libs/libevent
+	dev-libs/libxml2
 	dev-libs/openssl
 	!builtin-tinyxml? (
 		|| ( <dev-libs/tinyxml-2.6.2-r2[-stl]
-		     >=dev-libs/tinyxml-2.6.2-r2
+		    >=dev-libs/tinyxml-2.6.2-r2
 		)
 	)
 	dev-lang/v8
 	dev-vcs/subversion
+	gnome-base/libgnome-keyring
+	media-libs/flac
+	media-libs/libpng
+	media-libs/libwebp
+	media-libs/speex
 	!builtin-curl? (
 		net-misc/curl
 	)
@@ -33,25 +44,23 @@ DEPEND="
 		net-dns/c-ares
 	)
 	>=sys-devel/gcc-4.5
+	sys-libs/zlib
+	virtual/jpeg
 	>=x11-libs/gtk+-2.24
-	gnome-base/libgnome-keyring
-	x11-libs/libnotify"
-#	!builtin-wxWidgets? ( >=x11-libs/wxGTK-2.9.0 )
-#	net-print/libgnomecups
-#	dev-util/gyp
-#	dev-util/depot_tools
-#	check svn co http://google-breakpad.googlecode.com/svn/trunk -r 699  breakpad
-#	check svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_0/ wxWidgets
-
+	x11-misc/xdg-utils
+"
 
 RDEPEND="${DEPEND}"
 
 S="${WORKDIR}/desura"
 
-pkg_pretend() {
-	CHECKREQS_DISK_BUILD="4G"
-	check-reqs_pkg_pretend
-}
+# pkg_pretend not working EAPI < 4
+if [[ ${EAPI} != 4 ]]; then
+	src_unpack() {
+		check-reqs_pkg_pretend
+		git-2_src_unpack
+	}
+fi
 
 src_configure() {
 	mycmakeargs=(
@@ -76,3 +85,4 @@ src_install() {
 
 	prepgamesdirs
 }
+
