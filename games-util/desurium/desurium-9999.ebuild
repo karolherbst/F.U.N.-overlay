@@ -6,8 +6,7 @@ EAPI=3
 
 inherit check-reqs cmake-utils eutils git-2 games
 
-EGIT_REPO_URI="git://github.com/karolherbst/Desurium.git"
-EGIT_BRANCH="local"
+EGIT_REPO_URI="git://github.com/lodle/Desurium.git"
 
 CHECKREQS_DISK_BUILD="3G"
 
