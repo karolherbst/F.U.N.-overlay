@@ -1,0 +1,141 @@
+Make VirtualBox-4.1.16 kernel modules work again on kernels 3.5rc0+
+(after Al Viro removed do_mmap()/do_munmap() from public view).
+
+Manuel Lauss, 20120603
+
+diff -Naurp vboxdrv.old/r0drv/linux/memobj-r0drv-linux.c vboxdrv/r0drv/linux/memobj-r0drv-linux.c
+--- vboxdrv.old/r0drv/linux/memobj-r0drv-linux.c	2012-01-19 13:37:00.000000000 +0100
++++ vboxdrv/r0drv/linux/memobj-r0drv-linux.c	2012-06-03 09:17:16.417650091 +0200
+@@ -491,9 +491,7 @@ DECLHIDDEN(int) rtR0MemObjNativeFree(RTR
+                 Assert(pTask);
+                 if (pTask && pTask->mm)
+                 {
+-                    down_write(&pTask->mm->mmap_sem);
+                     MY_DO_MUNMAP(pTask->mm, (unsigned long)pMemLnx->Core.pv, pMemLnx->Core.cb);
+-                    up_write(&pTask->mm->mmap_sem);
+                 }
+             }
+             else
+@@ -516,9 +514,7 @@ DECLHIDDEN(int) rtR0MemObjNativeFree(RTR
+                 Assert(pTask);
+                 if (pTask && pTask->mm)
+                 {
+-                    down_write(&pTask->mm->mmap_sem);
+                     MY_DO_MUNMAP(pTask->mm, (unsigned long)pMemLnx->Core.pv, pMemLnx->Core.cb);
+-                    up_write(&pTask->mm->mmap_sem);
+                 }
+             }
+             else
+@@ -1147,10 +1143,10 @@ static void *rtR0MemObjLinuxDoMmap(RTR3P
+     }
+ 
+     if (R3PtrFixed != (RTR3PTR)-1)
+-        ulAddr = do_mmap(NULL, R3PtrFixed, cb, fLnxProt, MAP_SHARED | MAP_ANONYMOUS | MAP_FIXED, 0);
++        ulAddr = MY_DO_MMAP(NULL, R3PtrFixed, cb, fLnxProt, MAP_SHARED | MAP_ANONYMOUS | MAP_FIXED, 0);
+     else
+     {
+-        ulAddr = do_mmap(NULL, 0, cb, fLnxProt, MAP_SHARED | MAP_ANONYMOUS, 0);
++        ulAddr = MY_DO_MMAP(NULL, 0, cb, fLnxProt, MAP_SHARED | MAP_ANONYMOUS, 0);
+         if (    !(ulAddr & ~PAGE_MASK)
+             &&  (ulAddr & (uAlignment - 1)))
+         {
+@@ -1192,9 +1188,7 @@ DECLHIDDEN(int) rtR0MemObjNativeReserveU
+     pMemLnx = (PRTR0MEMOBJLNX)rtR0MemObjNew(sizeof(*pMemLnx), RTR0MEMOBJTYPE_RES_VIRT, pv, cb);
+     if (!pMemLnx)
+     {
+-        down_write(&pTask->mm->mmap_sem);
+         MY_DO_MUNMAP(pTask->mm, (unsigned long)pv, cb);
+-        up_write(&pTask->mm->mmap_sem);
+         return VERR_NO_MEMORY;
+     }
+ 
+@@ -1381,7 +1375,9 @@ DECLHIDDEN(int) rtR0MemObjNativeMapUser(
+          * Allocate user space mapping.
+          */
+         void *pv;
++#ifndef LINUX_NO_DOMMAP
+         down_write(&pTask->mm->mmap_sem);
++#endif
+         pv = rtR0MemObjLinuxDoMmap(R3PtrFixed, pMemLnxToMap->Core.cb, uAlignment, pTask, fProt);
+         if (pv != (void *)-1)
+         {
+@@ -1394,6 +1390,9 @@ DECLHIDDEN(int) rtR0MemObjNativeMapUser(
+             const size_t    cPages = pMemLnxToMap->Core.cb >> PAGE_SHIFT;
+             size_t          iPage;
+ 
++#ifdef LINUX_NO_DOMMAP
++	    down_write(&pTask->mm->mmap_sem);
++#endif
+             rc = 0;
+             if (pMemLnxToMap->cPages)
+             {
+@@ -1428,6 +1427,9 @@ DECLHIDDEN(int) rtR0MemObjNativeMapUser(
+                     if (rc)
+                     {
+                         rc = VERR_NO_MEMORY;
++#ifdef LINUX_NO_DOMMAP
++			up_write(&pTask->mm->mmap_sem);
++#endif
+                         break;
+                     }
+                 }
+@@ -1471,6 +1473,9 @@ DECLHIDDEN(int) rtR0MemObjNativeMapUser(
+                         if (rc)
+                         {
+                             rc = VERR_NO_MEMORY;
++#ifdef LINUX_NO_DOMMAP
++                            up_write(&pTask->mm->mmap_sem);
++#endif
+                             break;
+                         }
+                     }
+@@ -1489,14 +1494,20 @@ DECLHIDDEN(int) rtR0MemObjNativeMapUser(
+                 return VINF_SUCCESS;
+             }
+ 
++            up_write(&pTask->mm->mmap_sem);
+             /*
+              * Bail out.
+              */
+             MY_DO_MUNMAP(pTask->mm, (unsigned long)pv, pMemLnxToMap->Core.cb);
++#ifndef LINUX_NO_DOMMAP
++            down_write(&pTask->mm->mmap_sem);
++#endif
+         }
+-        up_write(&pTask->mm->mmap_sem);
+         rtR0MemObjDelete(&pMemLnx->Core);
+     }
++#ifndef LINUX_NO_DOMMAP
++    up_write(&pTask->mm->mmap_sem);
++#endif
+ #ifdef VBOX_USE_PAE_HACK
+     __free_page(pDummyPage);
+ #endif
+diff -Naurp vboxdrv.old/r0drv/linux/the-linux-kernel.h vboxdrv/r0drv/linux/the-linux-kernel.h
+--- vboxdrv.old/r0drv/linux/the-linux-kernel.h	2012-01-31 15:17:37.000000000 +0100
++++ vboxdrv/r0drv/linux/the-linux-kernel.h	2012-06-03 09:20:33.996406929 +0200
+@@ -269,6 +269,24 @@ DECLINLINE(unsigned long) msecs_to_jiffi
+ # endif  /* !RT_ARCH_AMD64 */
+ #endif /* !NO_REDHAT_HACKS */
+ 
++/* 3.5rc0 gets rid of do_mmap() and do_munmap().
++ * need to change vm locking a bit since the vm_*() calls take mmap_sem internally
++ */
++#ifndef do_mmap
++# define LINUX_NO_DOMMAP
++# define MY_DO_MMAP(a,b,c,d,e,f) vm_mmap(a, b, c, d, e, (f) >> PAGE_SHIFT)
++# define MY_DO_MUNMAP(a,b,c) vm_munmap(b, c)
++#else
++# undef LINUX_NO_DOMMAP
++# define MY_DO_MMAP(a,b,c,d,e,f) do_mmap(a, b, c, d, e, f)
++# define MY_DO_MUNMAP(a,b,c)					\
++	{							\
++		down_write(&(a)->mmap_sem);			\
++		do_munmap(a, b, c);				\
++		up_write(&(a)->mmap_sem);			\
++	}
++#endif
++
+ #ifndef MY_DO_MUNMAP
+ # define MY_DO_MUNMAP(a,b,c) do_munmap(a, b, c)
+ #endif
