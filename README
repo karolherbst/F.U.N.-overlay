@@ -1,0 +1,22 @@
+in /etc/layman/layman.cfg add near line 40 an own list of overlays:
+-------------------------------------------------------------------
+
+overlays  : http://www.gentoo.org/proj/en/overlays/repositories.xml
+            file:///var/lib/layman/my-list.xml                          <== new line
+
+create or modify /var/lib/layman/my-list.xml:
+---------------------------------------------
+
+<?xml version="1.0" ?>
+ <repositories version="1.0">
+   <repo priority="50" quality="experimental" status="unofficial">      <!-- start F.U.N. overlay -->
+     <name>F.U.N.</name>
+     <description>Overlay from karol und anagromataf</description>
+     <homepage>https://github.com/karolherbst/F.U.N.-overlay</homepage>
+     <owner>
+       <email>overlay@karolherbst.de</email>
+     </owner>
+     <source type="git">git://github.com/karolherbst/F.U.N.-overlay.git</source>
+   </repo>                                                              <!-- end -->
+ </repositories>
+
