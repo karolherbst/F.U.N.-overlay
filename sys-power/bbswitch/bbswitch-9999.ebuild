@@ -9,13 +9,15 @@ inherit git-2 linux-mod
 DESCRIPTION="Toggle discrete NVIDIA Optimus graphics card"
 HOMEPAGE="https://github.com/Bumblebee-Project/bbswitch"
 EGIT_REPO_URI="git://github.com/Bumblebee-Project/bbswitch.git"
+if use lenovo; then
 EGIT_BRANCH="hack-lenovo"
+fi
 SRC_URI=""
 
 SLOT="0"
 LICENSE="GPL-2"
 KEYWORDS=""
-IUSE=""
+IUSE="lenovo"
 
 DEPEND="virtual/linux-sources
 	sys-kernel/linux-headers"
