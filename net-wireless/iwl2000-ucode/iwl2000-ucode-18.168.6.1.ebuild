@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: /var/cvsroot/gentoo-x86/net-wireless/iwl2000-ucode/iwl2000-ucode-18.168.6.1.ebuild,v 1.1 2012/06/12 19:15:48 vapier Exp $
 
-MY_PN="iwlwifi-2030-ucode"
+MY_PN="iwlwifi-2000-ucode"
 
 DESCRIPTION="Intel (R) Wireless WiFi Advanced N 2000 ucode"
 HOMEPAGE="http://intellinuxwireless.org/?p=iwlwifi"
