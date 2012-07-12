@@ -11,6 +11,7 @@ if [[ ${PV} = 9999* ]]; then
 	GIT_ECLASS="git-2"
 	SRC_URI=""
 	EGIT_NOUNPACK="true"
+	EGIT_BRANCH="system_wx"
 else
 	DESURA_ARC="Desura-${PV}.tar.bz2"
 	SRC_URI="mirror://github.com/downloads/lodle/Desurium/${DESURA_ARC}"
@@ -23,9 +24,13 @@ CHROMIUM_ARC="chromium-15.0.876.0.tar.bz2"
 CHROMIUM_URI="http://commondatastorage.googleapis.com/chromium-browser-official/${CHROMIUM_ARC}"
 DEPOT_TOOLS_ARC="depot_tools-145556-2.tar.gz"
 DEPOT_TOOLS_URI="https://github.com/downloads/lodle/Desurium/${DEPOT_TOOLS_ARC}"
+<<<<<<< HEAD
+SRC_URI+="${BREAKPAD_URI} ${CEF_URI} ${CHROMIUM_URI} ${DEPOT_TOOLS_URI}"
+=======
 WX_ARC="wxWidgets-2.9.3.tar.bz2"
 WX_URI="ftp://ftp.wxwidgets.org/pub/2.9.3/${WX_ARC}"
 SRC_URI+="${BREAKPAD_URI} ${CEF_URI} ${CHROMIUM_URI} ${DEPOT_TOOLS_URI} ${WX_URI}"
+>>>>>>> dcc8ff3ec27e5f6704f868a1d3d9163a8dc04308
 
 inherit check-reqs cmake-utils eutils ${GIT_ECLASS} games gnome2-utils
 
@@ -93,6 +98,7 @@ COMMON_DEPEND="
 	sys-libs/zlib
 	virtual/jpeg
 	x11-libs/gtk+:2
+	x11-libs/wxGTK:2.9
 
 	amd64? ( 32bit? (
 		sys-devel/gcc[multilib]
@@ -128,6 +134,7 @@ src_configure() {
 	# -DWITH_ARES=FALSE will use system curl, because we force curl[ares] to have ares support
 	local mycmakeargs=(
 		-DWITH_ARES=FALSE
+		-DFORCE_SYS_DEPS=TRUE
 		$(cmake-utils_use debug DEBUG)
 		$(cmake-utils_use 32bit 32BIT_SUPPORT)
 		$(cmake-utils_use tools BUILD_TOOLS)
@@ -136,7 +143,10 @@ src_configure() {
 		-DCEF_URL="file://${DISTDIR}/${CEF_ARC}"
 		-DCHROMIUM_URL="file://${DISTDIR}/${CHROMIUM_ARC}"
 		-DDEPOT_TOOLS_URL="file://${DISTDIR}/${DEPOT_TOOLS_ARC}"
+<<<<<<< HEAD
+=======
 		-DWXWIDGET_URL="file://${DISTDIR}/${WX_ARC}"
+>>>>>>> dcc8ff3ec27e5f6704f868a1d3d9163a8dc04308
 	)
 	cmake-utils_src_configure
 }
