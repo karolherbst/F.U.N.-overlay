@@ -133,6 +133,7 @@ src_prepare() {
 	epatch "${FILESDIR}"/${PN}-1.4_rc2-multilib-portage.patch #395615
 	epatch "${FILESDIR}"/${PN}-1.5.10-osmesa-check.patch #429386
 	epatch "${FILESDIR}"/${PN}-raw3.patch #20395
+	./tools/make_requests
 	epatch "${DISTDIR}/${PULSE_PATCH}" #421365
 	epatch_user #282735
 	eautoreconf
