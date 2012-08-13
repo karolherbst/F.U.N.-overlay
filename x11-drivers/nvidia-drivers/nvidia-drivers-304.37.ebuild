@@ -143,6 +143,8 @@ src_prepare() {
 		/usr/$(get_libdir)/libcuda.so
 	EOF
 
+	epatch "${FILESDIR}"/nvidia-drivers-304.30-linux-3.6.patch
+
 	# Allow user patches so they can support RC kernels and whatever else
 	epatch_user
 }
