@@ -86,7 +86,6 @@ EXTERNAL_DEPEND="
 # keep blocks in rdepend for binpkg
 # gtest file collision bug #411825
 RDEPEND="${EXTERNAL_DEPEND}
-	dev-util/indent
 	!<x11-base/xorg-server-1.7
 	!<=x11-proto/xf86driproto-2.0.3
 	classic? ( app-admin/eselect-mesa )
@@ -170,7 +169,7 @@ src_prepare() {
 	epatch "${FILESDIR}"/${P}-dont-require-llvm-for-r300.patch
 
 	# patch for OpenGL CoreContext support and other GLSL and OpenGL stuff
-	epatch "${FILESDIR}"/${P}-Core-Context.patch
+	epatch "${FILESDIR}"/${P}-Core-Context-and-gles3.patch
 
 	# fix for hardened pax_kernel, bug 240956
 	[[ ${PV} != 9999* ]] && epatch "${FILESDIR}"/glx_ro_text_segm.patch
