@@ -136,7 +136,7 @@ src_prepare() {
 	# update some files
 	elog "run make_requests"
 	./tools/make_requests
-	epatch "${FILEDIRS}"/${PN}-GetLogicalProcessorInformation.patch #27189
+	epatch "${FILESDIR}"/${PN}-GetLogicalProcessorInformation.patch #27189
 	epatch "${DISTDIR}/${PULSE_PATCH}" #421365
 	epatch_user #282735
 	eautoreconf
