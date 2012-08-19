@@ -1,0 +1,500 @@
+From 55c15c6679aabde2b34b29f4f76bb767fff1a731 Mon Sep 17 00:00:00 2001
+From: Claudio Fontana <claudio.fontana@gmail.com>
+Date: Wed, 23 Nov 2011 00:18:30 +0100
+Subject: [PATCH] kernel32: implement GetLogicalProcessorInformation
+Cc: claudio.fontana@gmail.com
+
+First implementation of GetLogicalProcessorInformation.
+Limitations: all logical processors are added to the same NUMA set,
+and all cores are added to the same package.
+Only the linux-specific helper function is implemented, so for now
+everybody else gets the fallback hard-coded results only.
+The fallback is also triggered when the OS-specific APIs fail.
+
+The linux-specific function is based on sysfs.
+
+The new OS-specific functions can be easily added as additional
+ifdefs by following the linux example.
+---
+ dlls/kernel32/process.c         |  350 ++++++++++++++++++++++++++++++++++++++-
+ dlls/kernel32/tests/Makefile.in |    1 +
+ dlls/kernel32/tests/glpi.c      |   82 +++++++++
+ 3 files changed, 430 insertions(+), 3 deletions(-)
+ create mode 100644 dlls/kernel32/tests/glpi.c
+
+diff --git a/dlls/kernel32/process.c b/dlls/kernel32/process.c
+index b6c0b9d..de39244 100644
+--- a/dlls/kernel32/process.c
++++ b/dlls/kernel32/process.c
+@@ -51,6 +51,12 @@
+ 
+ #include "ntstatus.h"
+ #define WIN32_NO_STATUS
++
++#include "windef.h"
++#include "winbase.h"
++#include "winerror.h"
++#include "winnt.h"
++
+ #include "winternl.h"
+ #include "kernel_private.h"
+ #include "psapi.h"
+@@ -3705,14 +3711,352 @@ HANDLE WINAPI GetCurrentProcess(void)
+     return (HANDLE)~(ULONG_PTR)0;
+ }
+ 
++/***************
++ * glpi_impl_fb:
++ *   a fallback implementation of GetLogicalProcessorInformation
++ *   for the systems we do not support yet,
++ *   or for when the OS-specific API fails.
++ *   Same arguments and return value as glpi.
++ */
++
++#undef SLPI
++#ifdef NONAMELESSUNION
++#define SLPI(buffer, idx) buffer[idx].DUMMYUNIONNAME
++#else
++#define SLPI(buffer, idx) buffer[idx]
++#endif /* NONAMELESSUNION */
++
++static BOOL
++glpi_impl_fb(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION buffer, PDWORD pbuflen)
++{
++    int glpi_n = 5;
++    FIXME("(%p,%p): reporting hard coded information\n", buffer, pbuflen);
++
++    if (*pbuflen < sizeof(*buffer) * glpi_n)
++    {
++	SetLastError(ERROR_INSUFFICIENT_BUFFER);
++	*pbuflen = sizeof(*buffer) * glpi_n;
++	return FALSE;
++    }
++
++    buffer[0].ProcessorMask = (ULONG_PTR)0x01;
++    buffer[1].ProcessorMask = (ULONG_PTR)0x01;
++    buffer[2].ProcessorMask = (ULONG_PTR)0x01;
++    buffer[3].ProcessorMask = (ULONG_PTR)0x01;
++    buffer[4].ProcessorMask = (ULONG_PTR)0x01;
++
++    buffer[0].Relationship = RelationProcessorCore;
++    buffer[1].Relationship = RelationNumaNode;
++    buffer[2].Relationship = RelationCache;
++    buffer[3].Relationship = RelationCache;
++    buffer[4].Relationship = RelationProcessorPackage;
++
++    SLPI(buffer, 0).ProcessorCore.Flags = (BYTE)0x00;
++    SLPI(buffer, 1).NumaNode.NodeNumber = (DWORD)0x00;
++
++    SLPI(buffer, 2).Cache.Level = (BYTE)0x01;
++    SLPI(buffer, 2).Cache.Associativity = (BYTE)0x08;
++    SLPI(buffer, 2).Cache.LineSize = (WORD)64;
++    SLPI(buffer, 2).Cache.Size = (DWORD)16 << 10; /* 16 KB */
++    SLPI(buffer, 2).Cache.Type = CacheData;
++
++    SLPI(buffer, 3).Cache.Level = (BYTE)0x02;
++    SLPI(buffer, 3).Cache.Associativity = (BYTE)0x08;
++    SLPI(buffer, 3).Cache.LineSize = (WORD)64;
++    SLPI(buffer, 3).Cache.Size = (DWORD)1024 << 10; /* 1024 KB */
++    SLPI(buffer, 3).Cache.Type = CacheUnified;
++    /* no additional info for processor package at buffer[4] needed. */
++
++    *pbuflen = sizeof(*buffer) * glpi_n;
++    return TRUE;
++}
++
++#ifdef linux
++/******************
++ * glpi_impl_linux:
++ *   an implementation of GetLogicalProcessorInformation
++ *   for linux sysfs.
++ * Returns: -1 on API failure (trigger fallback),
++ *          otherwise see glpi.
++ */
++
++#define SYS_CPU "/sys/devices/system/cpu/cpu"
++#define SYS_CPU_MAX 63
++#define SYS_CPU_COREID "/topology/core_id"
++#define SYS_CPU_PACKAGEID "/topology/physical_package_id"
++#define SYS_CPU_CACHE "/cache/index"
++#define SYS_CPU_CACHE_MAX 12
++#define SYS_CPU_CACHE_LEVEL "/level"
++#define SYS_CPU_CACHE_SIZE "/size"
++#define SYS_CPU_CACHE_TYPE "/type"
++#define SYS_CPU_CACHE_LINE "/coherency_line_size"
++#define SYS_CPU_CACHE_ASSOC "/ways_of_associativity"
++
++static int glpi_impl_linux(SYSTEM_LOGICAL_PROCESSOR_INFORMATION *buffer,
++			   PDWORD pbuflen)
++{
++    /* remember the glpi results, so that subsequent calls are faster */
++    static int n_cores = 0;
++    static int n_caches = 0;
++    static PSYSTEM_LOGICAL_PROCESSOR_INFORMATION cores = NULL;
++    static PSYSTEM_LOGICAL_PROCESSOR_INFORMATION caches = NULL;
++    static SYSTEM_LOGICAL_PROCESSOR_INFORMATION numa[1];
++    static SYSTEM_LOGICAL_PROCESSOR_INFORMATION package[1];
++
++    if (!n_cores)
++    {
++	int n_cpus = 0; int cpu_i;
++	char path[255];
++
++	TRACE("building new cached result.\n");
++
++	for (n_cpus = 0; n_cpus < SYS_CPU_MAX; n_cpus++)
++	{
++	    snprintf(path, sizeof(path), SYS_CPU "%d", n_cpus);
++	    if (access(path, R_OK | X_OK) != 0)
++		break;
++	}
++
++	TRACE("detected %d logical cpus.\n", n_cpus);
++	if (n_cpus < 1)
++	{
++	    TRACE("requesting fallback implementation.\n");
++	    return -1;
++	}
++
++	cores = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*cores) * n_cpus);
++	caches = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*caches) * 1);
++
++	for (cpu_i = 0; cpu_i < n_cpus; cpu_i++)
++	{
++	    FILE *f; int core_id; int i;
++	    snprintf(path, sizeof(path), SYS_CPU "%d" SYS_CPU_COREID, cpu_i);
++	    cores[n_cores].ProcessorMask = (ULONG_PTR)0x01 << cpu_i;
++	    cores[n_cores].Relationship = RelationProcessorCore;
++
++	    if (!(f = fopen(path, "r")) || fscanf(f, "%d", &core_id) != 1)
++	    {
++		/* topology info not available, provide default cpuid=cpu_i */
++		ERR("could not read cpu%d topology.\n", cpu_i);
++		SLPI(cores, n_cores).Reserved[0] = cpu_i;
++		n_cores++;
++		if (f)
++		    fclose(f);
++		continue; /* next cpu */
++	    }
++
++	    /* normal sane case */
++	    fclose(f);
++	    /* store the core_id to catch cpus with same core_id */
++	    SLPI(cores, n_cores).Reserved[0] = core_id;
++
++	    /* look for this core_id in previous elements */
++	    for (i = 0; i < n_cores; i++)
++		if (SLPI(cores, i).Reserved[0] == SLPI(cores, n_cores).Reserved[0])
++		    break;
++
++	    if (i < n_cores)
++	    {
++		TRACE("found existing coreid %d for cpu%d.\n", core_id, cpu_i);
++		/* add this logical processor to the existing mask */
++		cores[i].ProcessorMask |= cores[n_cores].ProcessorMask;
++		/* do not advance n_cores: this element can be overwritten. */
++	    }
++	    else
++	    {
++		TRACE("found new coreid %d for cpu%d.\n", core_id, cpu_i);
++
++		/* look for caches */
++		for (i = 0; i < SYS_CPU_CACHE_MAX; i++)
++		{
++		    unsigned long value;
++		    char string[80];
++
++		    snprintf(path, sizeof(path), SYS_CPU "%d" SYS_CPU_CACHE "%d",
++			     cpu_i, i);
++		    if (access(path, R_OK | X_OK) != 0)
++			break; /* no more caches found. */
++
++		    caches = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
++					 caches, sizeof(*caches) * (n_caches + 1));
++
++		    /* we keep the index into the cores array to set
++		       the right value at the end. */
++		    caches[n_caches].ProcessorMask = (ULONG_PTR)n_cores;
++		    caches[n_caches].Relationship = RelationCache;
++
++		    snprintf(path, sizeof(path), SYS_CPU "%d" SYS_CPU_CACHE "%d"
++			     SYS_CPU_CACHE_LEVEL, cpu_i, i);
++		    if (!(f = fopen(path, "r")) || fscanf(f, "%lu", &value) != 1)
++			SLPI(caches, n_caches).Cache.Level = (BYTE)0x01;
++		    else
++			SLPI(caches, n_caches).Cache.Level = (BYTE)value;
++		    if (f)
++			fclose(f);
++
++		    snprintf(path, sizeof(path), SYS_CPU "%d" SYS_CPU_CACHE "%d"
++			     SYS_CPU_CACHE_ASSOC, cpu_i, i);
++		    if (!(f = fopen(path, "r")) || fscanf(f, "%lu", &value) != 1)
++			SLPI(caches, n_caches).Cache.Associativity = 0x08;
++		    else
++			SLPI(caches, n_caches).Cache.Associativity = (BYTE)value;
++		    if (f)
++			fclose(f);
++
++		    snprintf(path, sizeof(path), SYS_CPU "%d" SYS_CPU_CACHE "%d"
++			     SYS_CPU_CACHE_LINE, cpu_i, i);
++		    if (!(f = fopen(path, "r")) || fscanf(f, "%lu", &value) != 1)
++			SLPI(caches, n_caches).Cache.LineSize = (WORD)64;
++		    else
++			SLPI(caches, n_caches).Cache.LineSize = (WORD)value;
++		    if (f)
++			fclose(f);
++
++		    snprintf(path, sizeof(path), SYS_CPU "%d" SYS_CPU_CACHE "%d"
++			     SYS_CPU_CACHE_SIZE, cpu_i, i);
++		    if (!(f = fopen(path, "r")) || fscanf(f, "%lu", &value) != 1)
++			SLPI(caches, n_caches).Cache.Size = (DWORD)16 << 10;
++		    else
++			SLPI(caches, n_caches).Cache.Size = (DWORD)value << 10;
++		    if (f)
++			fclose(f);
++
++		    snprintf(path, sizeof(path), SYS_CPU "%d" SYS_CPU_CACHE "%d"
++			     SYS_CPU_CACHE_TYPE, cpu_i, i);
++		    if (!(f = fopen(path, "r")) || !fgets(string, sizeof(string), f))
++			SLPI(caches, n_caches).Cache.Type = CacheData;
++		    else switch (string[0])
++                    {
++		    case 'D':
++			SLPI(caches, n_caches).Cache.Type = CacheData; break;
++		    case 'I':
++			SLPI(caches, n_caches).Cache.Type = CacheInstruction; break;
++		    case 'U': default:
++			SLPI(caches, n_caches).Cache.Type =
++			    string[2] == 'i' ? CacheUnified : CacheTrace; break;
++		    }
++
++		    if (f)
++			fclose(f);
++
++		    n_caches++;
++		}
++		n_cores++;
++		TRACE("detected %d caches for coreid %d\n", i, core_id);
++	    }
++	}
++
++	if (n_caches < 1)
++	{
++	    HeapFree(GetProcessHeap(), 0, caches);
++	    caches = NULL;
++	}
++
++	/* trim leftovers */
++	cores = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY,
++			    cores, sizeof(*cores) * n_cores);
++
++	if (1) /* final cleanup work */
++	{
++	    int i;
++	    /* set the real processor mask in the caches. */
++	    for (i = 0; i < n_caches; i++)
++	    {
++		int cores_i;
++		cores_i = caches[i].ProcessorMask;
++		caches[i].ProcessorMask = cores[cores_i].ProcessorMask;
++	    }
++
++	    /* remove the reserved values from the cores, set flags,
++	       build numa and package. */
++
++	    numa[0].ProcessorMask = 0x00;
++	    numa[0].Relationship = RelationNumaNode;
++	    SLPI(numa, 0).NumaNode.NodeNumber = 0x00;
++	    package[0].Relationship = RelationProcessorPackage;
++
++	    for (i = 0; i < n_cores; i++)
++	    {
++		SLPI(cores, i).Reserved[0] = 0;
++		SLPI(cores, i).ProcessorCore.Flags = 0x00; /* ?unclear */
++		numa[0].ProcessorMask |= cores[i].ProcessorMask;
++	    }
++
++	    package[0].ProcessorMask = numa[0].ProcessorMask;
++	}
++    }
++
++    TRACE("getting cached result.\n");
++
++    if (1) /* final check for required size, final result */
++    {
++	DWORD required; required = sizeof(*cores) * (n_cores + n_caches + 2);
++	if (*pbuflen < required)
++	{
++	    TRACE("return with failure (ERROR_INSUFFICIENT_BUFFER).\n");
++	    SetLastError(ERROR_INSUFFICIENT_BUFFER);
++	    *pbuflen = required;
++	    return 0;
++	}
++
++	*pbuflen = required;
++
++	/* beware: buffer is SYSTEM_LOGICAL_PROCESSOR_INFORMATION *buffer; */
++	memcpy(buffer, cores, sizeof(*cores) * n_cores);
++	buffer += n_cores;
++
++	if (n_caches > 0)
++	{
++	    memcpy(buffer, caches, sizeof(*caches) * n_caches);
++	    buffer += n_caches;
++	}
++
++	*buffer++ = package[0];
++	*buffer++ = numa[0];
++    }
++
++    TRACE("return success!\n");
++    return 1;
++}
++
++#undef SYS_CPU
++#undef SYS_CPU_MAX
++#undef SYS_CPU_COREID
++#undef SYS_CPU_PACKAGEID
++#undef SYS_CPU_CACHE
++#undef SYS_CPU_CACHE_MAX
++#undef SYS_CPU_CACHE_LEVEL
++#undef SYS_CPU_CACHE_SIZE
++#undef SYS_CPU_CACHE_TYPE
++#undef SYS_CPU_CACHE_LINE
++#undef SYS_CPU_CACHE_ASSOC
++
++#endif /* linux */
++
+ /***********************************************************************
+  *           GetLogicalProcessorInformation     (KERNEL32.@)
+  */
+ BOOL WINAPI GetLogicalProcessorInformation(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION buffer, PDWORD pBufLen)
+ {
+-    FIXME("(%p,%p): stub\n", buffer, pBufLen);
+-    SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+-    return FALSE;
++    int rv;
++
++    if (pBufLen == NULL || buffer == NULL)
++    {
++	SetLastError(ERROR_BAD_ARGUMENTS);
++	return FALSE;
++    }
++
++#if defined linux
++    rv = glpi_impl_linux(buffer, pBufLen);
++#else /* no supported OS found */
++    rv = -1;
++#endif
++
++    /* fallback hard-coded result */
++    if (rv < 0)
++	rv = glpi_impl_fb(buffer, pBufLen);
++
++    return rv;
+ }
+ 
+ /***********************************************************************
+diff --git a/dlls/kernel32/tests/Makefile.in b/dlls/kernel32/tests/Makefile.in
+index dce27db..1505944 100644
+--- a/dlls/kernel32/tests/Makefile.in
++++ b/dlls/kernel32/tests/Makefile.in
+@@ -17,6 +17,7 @@ C_SRCS = \
+ 	file.c \
+ 	format_msg.c \
+ 	generated.c \
++	glpi.c \
+ 	heap.c \
+ 	loader.c \
+ 	locale.c \
+diff --git a/dlls/kernel32/tests/glpi.c b/dlls/kernel32/tests/glpi.c
+new file mode 100644
+index 0000000..a81d1d5
+--- /dev/null
++++ b/dlls/kernel32/tests/glpi.c
+@@ -0,0 +1,82 @@
++#include <stdarg.h>
++#include <stdlib.h>
++#include <time.h>
++#include <stdio.h>
++
++#include "wine/test.h"
++#include "windef.h"
++#include "winbase.h"
++#include "winerror.h"
++
++static void test_glpi(void)
++{
++    SYSTEM_LOGICAL_PROCESSOR_INFORMATION buffer[200];
++    DWORD buflen = sizeof(buffer);
++    BOOL ret; int i, n;
++
++    ret = GetLogicalProcessorInformation(NULL, &buflen);
++    ok(!ret, "Passing NULL as buffer should not be ok.\n");
++
++    ret = GetLogicalProcessorInformation(buffer, NULL);
++    ok(!ret, "Passing NULL as pbuflen should not be ok.\n");
++
++    ret = GetLogicalProcessorInformation(buffer, &buflen);
++    ok(ret, "Normal glpi call (%d)\n", GetLastError());
++
++    ret = GetLogicalProcessorInformation(buffer, &buflen);
++    ok(ret, "glpi call with the resulting buflen (%d)\n", buflen);
++
++    buflen--;
++
++    ret = GetLogicalProcessorInformation(buffer, &buflen);
++    ok(!ret, "glpi call with insufficient buflen (%d)\n", buflen);
++
++    ret = GetLogicalProcessorInformation(buffer, &buflen);
++    ok(ret, "glpi call with resulting buflen (%d)\n", buflen);
++
++    n = buflen / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
++
++    printf("glpi result: %d array elements.\n", n);
++
++#ifdef NONAMELESSUNION
++#define BUFFER_I buffer[i].u
++#else
++#define BUFFER_I buffer[i]
++#endif /* NONAMELESSUNION */
++
++    for (i = 0; i < n; i++)
++    {
++	switch (buffer[i].Relationship)
++	{
++	case RelationProcessorCore:
++	    printf("ProcessorCore idx=%03d mask=%lxh flags=%u\n",
++		   i, buffer[i].ProcessorMask, BUFFER_I.ProcessorCore.Flags);
++	    break;
++	case RelationNumaNode:
++	    printf("NumaNode      idx=%03d mask=%lxh noden=%u\n",
++		    i, buffer[i].ProcessorMask, BUFFER_I.NumaNode.NodeNumber);
++	    break;
++	case RelationCache:
++	    printf("Cache         idx=%03d mask=%lxh "
++		    "l=%u, a=%u, ls=%u, sz=%u, ty=%u\n",
++		   i, buffer[i].ProcessorMask,
++		   BUFFER_I.Cache.Level, BUFFER_I.Cache.Associativity,
++		   BUFFER_I.Cache.LineSize, BUFFER_I.Cache.Size,
++		   BUFFER_I.Cache.Type);
++	    break;
++	case RelationProcessorPackage:
++	    printf("ProcessorPack idx=%03d mask=%lxh\n",
++		   i, buffer[i].ProcessorMask);
++	    break;
++	default:
++	    ok(0, "invalid relationship %d", buffer[i].Relationship);
++	}
++    }
++#undef BUFFER_I
++}
++
++START_TEST(glpi)
++{
++    test_glpi();
++}
++
+-- 
+1.6.4
+
