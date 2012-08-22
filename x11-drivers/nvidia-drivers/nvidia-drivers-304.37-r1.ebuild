@@ -22,7 +22,7 @@ SRC_URI="x86? ( http://us.download.nvidia.com/XFree86/Linux-x86/${PV}/${X86_NV_P
 LICENSE="NVIDIA"
 SLOT="0"
 KEYWORDS="-* ~amd64 ~x86 ~amd64-fbsd ~x86-fbsd"
-IUSE="acpi multilib kernel_FreeBSD kernel_linux +tools +X"
+IUSE="acpi multilib kernel_FreeBSD kernel_linux +tools +X optimus"
 RESTRICT="strip"
 EMULTILIB_PKG="true"
 
@@ -30,7 +30,12 @@ COMMON="app-admin/eselect-opencl
 	kernel_linux? ( >=sys-libs/glibc-2.6.1 )
 	multilib? ( app-emulation/emul-linux-x86-xlibs )
 	X? (
-		<x11-base/xorg-server-1.12.99
+		optimus? (
+			<x11-base/xorg-server-1.13.99
+			)
+		!optimus? (
+                        <x11-base/xorg-server-1.12.99
+                        )
 		>=app-admin/eselect-opengl-1.0.9
 	)"
 DEPEND="${COMMON}
