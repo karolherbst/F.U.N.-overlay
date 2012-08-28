@@ -1,0 +1,60 @@
+--- Makefile.am
++++ Makefile.am
+@@ -57,6 +57,32 @@
+ 	NEWS \
+ 	README
+ 
++##Headers
++includeclhdir = $(prefix)/include/$(PACKAGE)/client/linux/handler
++includeclh_HEADERS = src/client/linux/handler/*.h
++
++includegbcdir = $(prefix)/include/$(PACKAGE)/google_breakpad/common
++includegbc_HEADERS = src/google_breakpad/common/*.h
++
++includecdir = $(prefix)/include/$(PACKAGE)/common
++includec_HEADERS = src/common/*.h
++
++includeclmdir = $(prefix)/include/$(PACKAGE)/client/linux/minidump_writer
++includeclm_HEADERS = src/client/linux/minidump_writer/*.h
++
++includeclcdir = $(prefix)/include/$(PACKAGE)/client/linux/crash_generation
++includeclc_HEADERS = src/client/linux/crash_generation/*.h
++
++includepdir = $(prefix)/include/$(PACKAGE)/processor
++includep_HEADERS = src/processor/*.h
++
++includelssdir = $(prefix)/include/$(PACKAGE)/third_party/lss
++includelss_HEADERS = src/third_party/lss/*.h
++
++##pkg-config
++
++pkgconfigdir = @pkgconfigdir@
++pkgconfig_DATA = breakpad.pc
+ 
+ ## Libraries
+ noinst_LIBRARIES =
+--- configure.ac
++++ configure.ac
+@@ -79,6 +79,15 @@
+                esac],
+               [usem32=false])
+ 
++AC_ARG_WITH(pkgconfigdir,
++	AC_HELP_STRING([--with-pkgconfigdir],
++	[Use the specified pkgconfig dir (default is libdir/pkgconfig)]),
++	[pkgconfigdir=${withval}],
++	[pkgconfigdir='${libdir}/pkgconfig'])
++
++AC_SUBST([pkgconfigdir])
++AC_MSG_NOTICE([pkgconfig directory is ${pkgconfigdir}])
++
+ AC_ARG_ENABLE(processor,
+               AS_HELP_STRING([--disable-processor],
+                              [Don't build processor library]
+@@ -138,5 +147,5 @@
+               [selftest=false])
+ AM_CONDITIONAL(SELFTEST, test x$selftest = xtrue)
+ 
+-AC_CONFIG_FILES([Makefile])
++AC_CONFIG_FILES([Makefile breakpad.pc:breakpad.pc.in])
+ AC_OUTPUT
