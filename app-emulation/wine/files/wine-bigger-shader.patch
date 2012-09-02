@@ -1,0 +1,13 @@
+diff --git a/dlls/wined3d/wined3d_private.h b/dlls/wined3d/wined3d_private.h
+index 1bc28c6..3ce634e 100644
+--- a/dlls/wined3d/wined3d_private.h
++++ b/dlls/wined3d/wined3d_private.h
+@@ -404,7 +404,7 @@ enum wined3d_shader_rel_op
+  * Shader model 3 according to msdn (and for software shaders) */
+ #define MAX_LABELS 16
+ 
+-#define SHADER_PGMSIZE 65535
++#define SHADER_PGMSIZE 131071
+ 
+ struct wined3d_shader_buffer
+ {
