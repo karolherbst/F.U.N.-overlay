@@ -1,6 +1,6 @@
 # Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.10.ebuild,v 1.2 2012/08/12 21:53:11 tetromino Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.13.ebuild,v 1.1 2012/09/14 20:24:37 tetromino Exp $
 
 EAPI="4"
 
@@ -78,7 +78,10 @@ RDEPEND="truetype? ( >=media-libs/freetype-2.0.0 media-fonts/corefonts )
 	alsa? ( media-libs/alsa-lib )
 	cups? ( net-print/cups )
 	opencl? ( virtual/opencl )
-	opengl? ( virtual/opengl )
+	opengl? (
+		virtual/glu
+		virtual/opengl
+	)
 	gsm? ( media-sound/gsm )
 	jpeg? ( virtual/jpeg )
 	ldap? ( net-nds/openldap )
@@ -129,16 +132,18 @@ src_unpack() {
 }
 
 src_prepare() {
+	local md5="$(md5sum server/protocol.def)"
 	epatch "${FILESDIR}"/${PN}-1.1.15-winegcc.patch #260726
 	epatch "${FILESDIR}"/${PN}-1.4_rc2-multilib-portage.patch #395615
-	epatch "${FILESDIR}"/${PN}-1.5.10-osmesa-check.patch #429386
-	epatch "${FILESDIR}"/${PN}-raw3.patch #20395
-	# update some files
-	elog "run make_requests"
-	./tools/make_requests
-	epatch "${FILESDIR}"/${PN}-GetLogicalProcessorInformation.patch #27189
+	epatch "${FILESDIR}"/${PN}-1.5.11-osmesa-check.patch #429386
+	epatch "${FILESDIR}"/${PN}-bigger-shader.patch
+    epatch "${FILESDIR}"/${PN}-crysis-mem-leak.patch
 	epatch "${DISTDIR}/${PULSE_PATCH}" #421365
 	epatch_user #282735
+	if [[ "$(md5sum server/protocol.def)" != "${md5}" ]]; then
+		einfo "server/protocol.def was patched; running tools/make_requests"
+		tools/make_requests || die #432348
+	fi
 	eautoreconf
 	sed -i '/^UPDATE_DESKTOP_DATABASE/s:=.*:=true:' tools/Makefile.in || die
 	sed -i '/^MimeType/d' tools/wine.desktop || die #117785
@@ -194,7 +199,7 @@ do_configure() {
 		$(use_with xml xslt) \
 		$2
 
-	emake -j1 depend
+	emake depend
 
 	popd >/dev/null
 }
