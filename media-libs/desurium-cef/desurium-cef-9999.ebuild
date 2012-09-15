@@ -7,11 +7,10 @@ EAPI=4
 unset GIT_ECLASS
 
 if [[ ${PV} = 9999* ]]; then
-	EGIT_REPO_URI="git://github.com/karolherbst/Desurium.git"
+	EGIT_REPO_URI="git://github.com/lodle/Desurium.git"
 	GIT_ECLASS="git-2"
 	SRC_URI=""
 	EGIT_NOUNPACK="true"
-	EGIT_BRANCH="bug258"
 else
 	DESURA_ARC="Desura-${PV}.tar.bz2"
 	SRC_URI="mirror://github.com/downloads/lodle/Desurium/${DESURA_ARC}"
