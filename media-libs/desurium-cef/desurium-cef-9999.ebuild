@@ -96,4 +96,3 @@ src_compile() {
 src_install() {
 	cmake-utils_src_install
 }
-
