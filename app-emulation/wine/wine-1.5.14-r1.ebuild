@@ -1,6 +1,6 @@
 # Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.13.ebuild,v 1.1 2012/09/14 20:24:37 tetromino Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.14.ebuild,v 1.1 2012/09/29 06:32:32 tetromino Exp $
 
 EAPI="4"
 
@@ -199,7 +199,7 @@ do_configure() {
 		$(use_with xml xslt) \
 		$2
 
-	emake depend
+	emake -j1 depend
 
 	popd >/dev/null
 }
