@@ -1,10 +1,10 @@
-# Copyright 1999-2011 Gentoo Foundation
+# Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-sound/teamspeak-client-bin/teamspeak-client-bin-3.0.1.ebuild,v 1.1 2011/08/26 15:08:21 cthulhu Exp $
+# $Header: /var/cvsroot/gentoo-x86/media-sound/teamspeak-client-bin/teamspeak-client-bin-3.0.6.ebuild,v 1.1 2012/05/09 11:49:45 polynomial-c Exp $
 
 EAPI=2
 
-inherit eutils
+inherit eutils unpacker
 
 DESCRIPTION="TeamSpeak Client - Voice Communication Software"
 HOMEPAGE="http://teamspeak.com/"
@@ -29,13 +29,6 @@ RDEPEND="${DEPEND}
 		>=media-libs/libpng-1.4
 		>=x11-libs/qt-gui-4.7[accessibility]
 		>=x11-libs/libXinerama-1.0.2"
-
-src_unpack() {
-	# TODO: unpack_makeself -- use this version once it supports makeself 2.1.6
-	for i in ${A}; do
-		sh "${DISTDIR}/${i}" --target "${WORKDIR}" || die "unpack failed"
-	done
-}
 
 src_install() {
 	local dest="${D}/opt/teamspeak3-client"
@@ -66,4 +59,3 @@ src_install() {
 		fi
 	done
 }
-
