@@ -19,8 +19,8 @@ else
 fi
 
 GV="1.8"
-MV="0.0.4"
-PULSE_PATCHES="winepulse-patches-1.5.15"
+MV="0.0.8"
+PULSE_PATCHES="winepulse-patches-1.5.16"
 DESCRIPTION="free implementation of Windows(tm) on Unix"
 HOMEPAGE="http://www.winehq.org/"
 SRC_URI="${SRC_URI}
@@ -209,7 +209,7 @@ do_configure() {
 		$(use_with xml xslt) \
 		$2
 
-	emake -j1 depend
+	emake ${MAKEOPTS} depend
 
 	popd >/dev/null
 }
