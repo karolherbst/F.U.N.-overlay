@@ -13,7 +13,6 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 RESTRICT="strip"
-PROPERTIES="interactive"
 LANGS="ca de en es fr pt ru"
 for x in ${LANGS} ; do
 	IUSE="${IUSE} linguas_${x}"
