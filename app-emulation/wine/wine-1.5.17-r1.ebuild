@@ -1,6 +1,6 @@
 # Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.16-r1.ebuild,v 1.1 2012/10/29 23:36:46 tetromino Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.17.ebuild,v 1.1 2012/11/09 23:24:07 tetromino Exp $
 
 EAPI="4"
 
@@ -20,7 +20,7 @@ fi
 
 GV="1.8"
 MV="0.0.8"
-PULSE_PATCHES="winepulse-patches-1.5.16"
+PULSE_PATCHES="winepulse-patches-1.5.17"
 DESCRIPTION="Free implementation of Windows(tm) on Unix"
 HOMEPAGE="http://www.winehq.org/"
 SRC_URI="${SRC_URI}
@@ -142,7 +142,7 @@ src_prepare() {
 	local md5="$(md5sum server/protocol.def)"
 	epatch "${FILESDIR}"/${PN}-1.1.15-winegcc.patch #260726
 	epatch "${FILESDIR}"/${PN}-1.4_rc2-multilib-portage.patch #395615
-	epatch "${FILESDIR}"/${PN}-1.5.11-osmesa-check.patch #429386
+	epatch "${FILESDIR}"/${PN}-1.5.17-osmesa-check.patch #429386
 	epatch "${FILESDIR}"/${PN}-bigger-shader.patch
     epatch "${FILESDIR}"/${PN}-crysis-mem-leak.patch
 	epatch "../${PULSE_PATCHES}"/*.patch #421365
