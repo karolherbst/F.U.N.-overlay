@@ -20,7 +20,7 @@ fi
 
 GV="1.8"
 MV="0.0.8"
-PULSE_PATCHES="winepulse-patches-1.5.17"
+PULSE_PATCHES="winepulse-patches-1.5.18"
 DESCRIPTION="Free implementation of Windows(tm) on Unix"
 HOMEPAGE="http://www.winehq.org/"
 SRC_URI="${SRC_URI}
