@@ -1,10 +1,10 @@
 # Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.17.ebuild,v 1.1 2012/11/09 23:24:07 tetromino Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.18.ebuild,v 1.1 2012/11/24 23:06:38 tetromino Exp $
 
 EAPI="4"
 
-inherit autotools eutils flag-o-matic multilib pax-utils
+inherit autotools eutils flag-o-matic gnome2-utils multilib pax-utils
 
 if [[ ${PV} == "9999" ]] ; then
 	EGIT_REPO_URI="git://source.winehq.org/git/wine.git"
@@ -21,6 +21,7 @@ fi
 GV="1.8"
 MV="0.0.8"
 PULSE_PATCHES="winepulse-patches-1.5.18"
+WINE_GENTOO="wine-gentoo-2012.11.24"
 DESCRIPTION="Free implementation of Windows(tm) on Unix"
 HOMEPAGE="http://www.winehq.org/"
 SRC_URI="${SRC_URI}
@@ -29,7 +30,8 @@ SRC_URI="${SRC_URI}
 		win64? ( mirror://sourceforge/${PN}/Wine%20Gecko/${GV}/wine_gecko-${GV}-x86_64.msi )
 	)
 	mono? ( mirror://sourceforge/${PN}/Wine%20Mono/${MV}/wine-mono-${MV}.msi )
-	http://dev.gentoo.org/~tetromino/distfiles/${PN}/${PULSE_PATCHES}.tar.bz2"
+	http://dev.gentoo.org/~tetromino/distfiles/${PN}/${PULSE_PATCHES}.tar.bz2
+	http://dev.gentoo.org/~tetromino/distfiles/${PN}/${WINE_GENTOO}.tar.bz2"
 
 LICENSE="LGPL-2.1"
 SLOT="0"
@@ -136,6 +138,7 @@ src_unpack() {
 	fi
 
 	unpack "${PULSE_PATCHES}.tar.bz2"
+	unpack "${WINE_GENTOO}.tar.bz2"
 }
 
 src_prepare() {
@@ -233,6 +236,7 @@ src_install() {
 		[[ -d ${builddir} ]] || continue
 		emake -C "${builddir}" install DESTDIR="${D}"
 	done
+	emake -C "../${WINE_GENTOO}" install DESTDIR="${D}" EPREFIX="${EPREFIX}"
 	dodoc ANNOUNCE AUTHORS README
 	if use gecko ; then
 		insinto /usr/share/wine/gecko
@@ -256,4 +260,16 @@ src_install() {
 		dosym /usr/bin/wine{64,} # 404331
 		dosym /usr/bin/wine{64,}-preloader
 	fi
+}
+
+pkg_preinst() {
+	gnome2_icon_savelist
+}
+
+pkg_postinst() {
+	gnome2_icon_cache_update
+}
+
+pkg_postrm() {
+	gnome2_icon_cache_update
 }
