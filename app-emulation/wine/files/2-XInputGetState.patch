@@ -1,0 +1,115 @@
+diff --git a/dlls/xinput1_3/xinput1_3_main.c b/dlls/xinput1_3/xinput1_3_main.c
+index 13bd09d..4b7612d 100644
+--- a/dlls/xinput1_3/xinput1_3_main.c
++++ b/dlls/xinput1_3/xinput1_3_main.c
+@@ -65,7 +65,11 @@ static const unsigned int xbuttons[WINE_XINPUT_BUTTONS] = {XINPUT_GAMEPAD_START,
+ static struct xpad {
+     char             device[EVDEVPREFIX_LEN + 4];
+     int              fd;
++    BOOL             ff;
+     XINPUT_STATE     state;
++#ifdef HAVE_STRUCT_FF_EFFECT_DIRECTION
++    struct ff_effect eff;
++#endif
+ } xpads[XUSER_MAX_COUNT];
+ 
+ static inline BOOL different_states(const PXINPUT_STATE const a, const PXINPUT_STATE const b)
+@@ -79,6 +83,12 @@ static inline BOOL different_states(const PXINPUT_STATE const a, const PXINPUT_S
+         || a->Gamepad.wButtons      != b->Gamepad.wButtons;
+ }
+ 
++static inline BOOL different_vibrations(const struct ff_rumble_effect* const a, const PXINPUT_VIBRATION const b)
++{
++    return a->strong_magnitude != b->wLeftMotorSpeed
++        || a->weak_magnitude   != b->wRightMotorSpeed;
++}
++
+ static void xinput_find_joydevs(void)
+ {
+     int  fd, i, j;
+@@ -117,8 +127,12 @@ static void xinput_find_joydevs(void)
+ 
+     /* Loop through all devices and test whether they are Xbox360 Controllers */
+     for(j=0; j<MAX_JOYDEV; j++) {
++        int  num;
++        BOOL no_ff_check = 0;
++        BYTE ffbits[(FF_MAX+7)/8];
+         BYTE absbits[(ABS_MAX+7)/8];
+         BYTE keybits[(KEY_MAX+7)/8];
++        ZeroMemory(ffbits, sizeof(ffbits));
+         ZeroMemory(absbits, sizeof(absbits));
+         ZeroMemory(keybits, sizeof(keybits));
+ 
+@@ -131,7 +145,11 @@ static void xinput_find_joydevs(void)
+         if(i<XUSER_MAX_COUNT)
+             continue;
+ 
+-        if((fd = open(buf, O_RDONLY)) == -1)
++        if((fd = open(buf, O_RDWR)) == -1) {
++            fd = open(buf, O_RDONLY);
++            no_ff_check = 1;
++        }
++        if(fd == -1)
+             continue;
+ 
+         /* Get device name */
+@@ -168,6 +186,22 @@ static void xinput_find_joydevs(void)
+         snprintf(xpads[i].device, sizeof(xpads[i].device), EVDEVPREFIX"%d", j);
+         xpads[i].fd = fd;
+         TRACE("Added device %s as Xbox360 Controller %d: %s\n", xpads[i].device, i, buf);
++
++#ifdef HAVE_STRUCT_FF_EFFECT_DIRECTION
++        xpads[i].eff.type = FF_RUMBLE;
++        xpads[i].eff.id = -1;
++        xpads[i].eff.replay.length = 0x7fff;
++
++        if(!no_ff_check
++        && ioctl(fd, EVIOCGBIT(EV_FF, sizeof(ffbits)), ffbits) != -1
++        && test_bit(ffbits,FF_RUMBLE)
++        && ioctl(fd, EVIOCGEFFECTS, &num) != -1
++        && num > 0
++        && ioctl(fd, EVIOCSFF, &xpads[i].eff) != -1) {
++            TRACE(" ... with rumble\n");
++            xpads[i].ff = 1;
++        }
++#endif  /* HAVE_STRUCT_FF_EFFECT_DIRECTION */
+         continue;
+ 
+ fail:   close(fd);
+@@ -201,6 +235,28 @@ void WINAPI XInputEnable(BOOL enable)
+ 
+ DWORD WINAPI XInputSetState(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration)
+ {
++#ifdef HAVE_CORRECT_LINUXINPUT_H
++    TRACE("(%d %p) Stub!\n", dwUserIndex, pVibration);
++
++    if (!pVibration || dwUserIndex >= XUSER_MAX_COUNT)
++        return ERROR_BAD_ARGUMENTS;
++
++    xinput_find_joydevs();
++    if(xpads[dwUserIndex].fd == -1)
++        return ERROR_DEVICE_NOT_CONNECTED;
++
++#ifdef HAVE_STRUCT_FF_EFFECT_DIRECTION
++    if(xpads[dwUserIndex].ff)
++        if(different_vibrations(&xpads[dwUserIndex].eff.u.rumble, pVibration)) {
++            xpads[dwUserIndex].eff.u.rumble = *(struct ff_rumble_effect*)pVibration;
++            ioctl(xpads[dwUserIndex].fd, EVIOCSFF, &xpads[dwUserIndex].eff);
++            write(xpads[dwUserIndex].fd, &(struct input_event){.type=EV_FF, xpads[dwUserIndex].eff.id, 1}, sizeof(struct input_event));
++        }
++#endif  /* HAVE_STRUCT_FF_EFFECT_DIRECTION */
++
++    return ERROR_SUCCESS;
++
++#else  /* HAVE_CORRECT_LINUXINPUT_H */
+     FIXME("(%d %p) Stub!\n", dwUserIndex, pVibration);
+ 
+     if (dwUserIndex < XUSER_MAX_COUNT)
+@@ -209,6 +265,7 @@ DWORD WINAPI XInputSetState(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration)
+         /* If controller exists then return ERROR_SUCCESS */
+     }
+     return ERROR_BAD_ARGUMENTS;
++#endif  /* HAVE_CORRECT_LINUXINPUT_H */
+ }
+ 
+ DWORD WINAPI XInputGetState(DWORD dwUserIndex, XINPUT_STATE* pState)

@@ -1,0 +1,73 @@
+diff --git a/dlls/xinput1_3/xinput1_3_main.c b/dlls/xinput1_3/xinput1_3_main.c
+index 4b7612d..f63359d 100644
+--- a/dlls/xinput1_3/xinput1_3_main.c
++++ b/dlls/xinput1_3/xinput1_3_main.c
+@@ -58,6 +58,7 @@ WINE_DEFAULT_DEBUG_CHANNEL(xinput);
+ #define WINE_XINPUT_AXES     8
+ #define WINE_XINPUT_BUTTONS 10
+ 
++static BOOL enabled = 1;
+ static const unsigned int axes[WINE_XINPUT_AXES]        = {ABS_X, ABS_Y, ABS_Z, ABS_RX, ABS_RY, ABS_RZ, ABS_HAT0X, ABS_HAT0Y};
+ static const unsigned int jbuttons[WINE_XINPUT_BUTTONS] = {BTN_START, BTN_BACK, BTN_THUMBL, BTN_THUMBR, BTN_TL, BTN_TR, BTN_A, BTN_B, BTN_X, BTN_Y};
+ static const unsigned int xbuttons[WINE_XINPUT_BUTTONS] = {XINPUT_GAMEPAD_START, XINPUT_GAMEPAD_BACK, XINPUT_GAMEPAD_LEFT_THUMB, XINPUT_GAMEPAD_RIGHT_THUMB, XINPUT_GAMEPAD_LEFT_SHOULDER, XINPUT_GAMEPAD_RIGHT_SHOULDER, XINPUT_GAMEPAD_A, XINPUT_GAMEPAD_B, XINPUT_GAMEPAD_X, XINPUT_GAMEPAD_Y};
+@@ -219,6 +220,7 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved)
+         DisableThreadLibraryCalls(inst);
+         break;
+     case DLL_PROCESS_DETACH:
++        XInputEnable(0);
+         break;
+     }
+     return TRUE;
+@@ -230,7 +232,22 @@ void WINAPI XInputEnable(BOOL enable)
+     to the controllers. Setting to true will send the last vibration
+     value (sent to XInputSetState) to the controller and allow messages to
+     be sent */
++#ifdef HAVE_CORRECT_LINUXINPUT_H
++    int i;
++
++    TRACE("(%d) Stub!\n", enable);
++
++#ifdef HAVE_STRUCT_FF_EFFECT_DIRECTION
++    if(enabled != enable)
++        for(i=0; i<XUSER_MAX_COUNT; i++)
++            if(xpads[i].fd != -1 && xpads[i].ff)
++                write(xpads[i].fd, &(struct input_event){.type=EV_FF, xpads[i].eff.id, enable}, sizeof(struct input_event));
++#endif  /* HAVE_STRUCT_FF_EFFECT_DIRECTION */
++    enabled = enable;
++
++#else  /* HAVE_CORRECT_LINUXINPUT_H */
+     FIXME("(%d) Stub!\n", enable);
++#endif  /* HAVE_CORRECT_LINUXINPUT_H */
+ }
+ 
+ DWORD WINAPI XInputSetState(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration)
+@@ -250,7 +267,7 @@ DWORD WINAPI XInputSetState(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration)
+         if(different_vibrations(&xpads[dwUserIndex].eff.u.rumble, pVibration)) {
+             xpads[dwUserIndex].eff.u.rumble = *(struct ff_rumble_effect*)pVibration;
+             ioctl(xpads[dwUserIndex].fd, EVIOCSFF, &xpads[dwUserIndex].eff);
+-            write(xpads[dwUserIndex].fd, &(struct input_event){.type=EV_FF, xpads[dwUserIndex].eff.id, 1}, sizeof(struct input_event));
++            write(xpads[dwUserIndex].fd, &(struct input_event){.type=EV_FF, xpads[dwUserIndex].eff.id, enabled}, sizeof(struct input_event));
+         }
+ #endif  /* HAVE_STRUCT_FF_EFFECT_DIRECTION */
+ 
+@@ -284,6 +301,12 @@ DWORD WINAPI XInputGetState(DWORD dwUserIndex, XINPUT_STATE* pState)
+     if(xpads[dwUserIndex].fd == -1)
+         return ERROR_DEVICE_NOT_CONNECTED;
+ 
++    /* If XInput is not enabled we need to return neutral data */
++    if(!enabled) {
++        ZeroMemory(pState, sizeof(XINPUT_STATE));
++        goto packet;
++    }
++
+     /* Get joystick axes and map them to XInput axes */
+     for(i=0; i<WINE_XINPUT_AXES; i++)
+         if(ioctl(xpads[dwUserIndex].fd, EVIOCGABS(axes[i]), &abs[i]) == -1) {
+@@ -310,6 +333,7 @@ DWORD WINAPI XInputGetState(DWORD dwUserIndex, XINPUT_STATE* pState)
+     for(i=0; i<WINE_XINPUT_BUTTONS; i++)
+         if(test_bit(key,jbuttons[i])) pState->Gamepad.wButtons |= xbuttons[i];
+ 
++packet:
+     /* Increment PacketNumber only if state has changed */
+     pState->dwPacketNumber = xpads[dwUserIndex].state.dwPacketNumber;
+     if(different_states(pState, &xpads[dwUserIndex].state)) {
