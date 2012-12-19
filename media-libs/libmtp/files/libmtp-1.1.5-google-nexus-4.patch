@@ -1,0 +1,14 @@
+--- src/music-players.h.old	2012-09-12 23:47:04.000000000 +0200
++++ src/music-players.h	2012-12-19 08:38:33.146299946 +0100
+@@ -1682,6 +1682,11 @@
+       0xd109, DEVICE_FLAGS_ANDROID_BUGS },
+   { "Google Inc (for LG Electronics)", 0x18d1, "P990/Optimus", 0xd10a,
+       DEVICE_FLAGS_ANDROID_BUGS },
++  // Reported by Alejandro Mankowski <alejndro@googlemail.com>
++  { "Google Inc (for LG Electronics)", 0x18d1, "Nexus 4", 0x4ee1,
++      DEVICE_FLAGS_ANDROID_BUGS },
++  { "Google Inc (for LG Electronics)", 0x18d1, "Nexus 4 + Debug", 0x4ee2,
++      DEVICE_FLAGS_ANDROID_BUGS },
+ 
+ 
+   /*
