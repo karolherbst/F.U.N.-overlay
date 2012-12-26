@@ -6,7 +6,7 @@ EAPI="4"
 
 inherit games multilib unpacker-nixstaller
 
-TIMESTAMP="2012-12-18"
+TIMESTAMP="2012-12-22"
 
 DESCRIPTION=""
 HOMEPAGE="http://www.grimrock.net/"
@@ -28,7 +28,6 @@ RDEPEND="
 	media-libs/ilmbase
 	virtual/jpeg
 	media-libs/lcms
-	media-libs/libjpeg-turbo
 	media-libs/libogg
 	media-libs/libpng
 	media-libs/libraw
