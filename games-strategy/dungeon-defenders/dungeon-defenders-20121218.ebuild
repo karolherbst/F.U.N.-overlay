@@ -26,7 +26,7 @@ RDEPEND="x11-misc/xdg-utils
 	x86? ( >=media-libs/openal-1 )"
 
 S="${WORKDIR}/${MY_PN}"
-DDDATA="${GAMES_DATADIR}/${PN}"
+DDDATA="${GAMES_PREFIX_OPT}/${PN}"
 QA_PREBUILT="${DDDATA#/}/UDKGame/Binaries/${MY_PN}-x86"
 
 CHECKREQS_DISK_BUILD="5750M"
