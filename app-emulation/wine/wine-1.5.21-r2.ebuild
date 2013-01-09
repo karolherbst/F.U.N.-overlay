@@ -148,12 +148,13 @@ src_prepare() {
 	epatch "${FILESDIR}"/${PN}-1.1.15-winegcc.patch #260726
 	epatch "${FILESDIR}"/${PN}-1.4_rc2-multilib-portage.patch #395615
 	epatch "${FILESDIR}"/${PN}-1.5.17-osmesa-check.patch #429386
-	use vanilla || epatch "${FILESDIR}"/${PN}-bigger-shader.patch
-    use vanilla || epatch "${FILESDIR}"/${PN}-crysis-mem-leak.patch
-	use vanilla || epatch "${FILESDIR}"/1-XInputGetState.patch
-	use vanilla || epatch "${FILESDIR}"/2-XInputGetState.patch
-	use vanilla || epatch "${FILESDIR}"/3-XInputGetState.patch
-	use vanilla || epatch "${FILESDIR}"/4-XInputGetState.patch
+	epatch "${FILESDIR}"/${PN}-bigger-shader.patch
+    epatch "${FILESDIR}"/${PN}-crysis-mem-leak.patch
+	epatch "${FILESDIR}"/${PN}-conviction-hack.patch
+	epatch "${FILESDIR}"/1-XInputGetState.patch
+	epatch "${FILESDIR}"/2-XInputGetState.patch
+	epatch "${FILESDIR}"/3-XInputGetState.patch
+	epatch "${FILESDIR}"/4-XInputGetState.patch
 	[[ ${PV} == "9999" ]] || epatch "../${PULSE_PATCHES}"/*.patch #421365
 	epatch_user #282735
 	if [[ "$(md5sum server/protocol.def)" != "${md5}" ]]; then
