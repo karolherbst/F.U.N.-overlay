@@ -11,13 +11,13 @@ DESCRIPTION="A platform-adventure game by Studio Pixel"
 HOMEPAGE="http://www.nicalis.com/"
 
 HIBPAGE="http://www.humblebundle.com"
-SRC_URI="${PN//\+/plus}-linux-${PV}.tar.gz"
+SRC_URI="cave_story_plus-linux-r${PV}.tar.bz2"
 
 RESTRICT="fetch strip"
 LICENSE="as-is"
 
 SLOT="0"
-KEYWORDS="-* ~amd64 ~x86"
+KEYWORDS="-* amd64 ~x86"
 IUSE="-bundled-libs"
 
 RDEPEND="!bundled-libs? (
@@ -25,7 +25,7 @@ RDEPEND="!bundled-libs? (
 	    virtual/glu )
 	 virtual/opengl"
 
-S="${WORKDIR}/${MY_PN}"
+S="${WORKDIR}/CaveStoryPlus"
 
 GAMEDIR="${GAMES_PREFIX_OPT}/${PN}"
 
@@ -40,11 +40,11 @@ pkg_nofetch() {
 src_install() {
 	# Data:
 	insinto "${GAMEDIR}" || die "insinto \"${GAMEDIR}\" failed"
-	find . -maxdepth 1 -mindepth 1 -type d ! -iname "lib*" -exec doins -r '{}' \+ || die "doins data failed"
+	doins -r data || die "doins data failed"
 
 	# Executable and libraries:
-	exeinto "${GAMEDIR}" || die "exeinto \"${GAMEDIR}\" failed""newexe \"${PN}\" failed"
-	newexe "${MY_PN}$(usex "amd64" "_64" "")" "${PN}" || die 
+	exeinto "${GAMEDIR}" || die "exeinto \"${GAMEDIR}\" failed"
+	newexe "${MY_PN}$(usex "amd64" "_64" "")" "${PN}" || die "newexe \"${PN}\" failed"
 	use bundled-libs && ( doins -r "lib$(usex "amd64" "64" "")" || die "doins bundled libs failed" )
 
 	# Make game wrapper:
