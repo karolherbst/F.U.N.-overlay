@@ -1,0 +1,40 @@
+Author: Maarten Lankhorst <m.b.lankhorst@gmail.com>
+Date:   Fri Nov 23 00:45:32 2012 +0100
+
+note to maintainers
+
+Some patches went in to the wine tree (mostly 1 liners), and I
+reworked some of my earlier dsound patches. I don't expect any
+regressions from that, but I did also introduce some new features.
+
+Changes since 1.5.17:
+One (1) of the dsound patches has made it through the review queue..
+Cheers, I guess. :/
+
+Changes since 1.5.16:
+
+IP_UNICAST_IF fix is upstream.
+
+Changes since 1.5.15:
+
+I updated the rtkit patches now so that runaway realtime threads
+can no longer lock up the system. This was always planned, but
+unfortunately it had a bug where the timeout was 150 seconds, not
+150 ms. I increased the timeout to 1 second, after which wineserver
+will downgrade the offending processes threads. This hugely increases
+the safety of enabling rtkit, and I would like to thank tizbac for
+reporting it to me.
+
+Furthermore I added a patch to enable IP_UNICAST_IF when compiling
+against older headers, which allows you to enable broadcast support
+on newer kernels when building against older headers.
+
+I did some small changes to winepulse to decrease it's aggressiveness
+of firing events. This shouldn't cause any playback regressions, but
+if it does, please contact me!
+
+Some small changes to dsound patches have been made, mostly fixes. I
+don't expect any regressions, but again please let me know if they do.
+
+~Maarten
+
