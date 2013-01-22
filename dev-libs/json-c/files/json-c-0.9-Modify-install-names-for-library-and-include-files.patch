@@ -1,0 +1,98 @@
+From 30dd367c0a2467dc292f653ea3afd6ad4c6e034b Mon Sep 17 00:00:00 2001
+From: Keith Derrick <keith.derrick@palm.com>
+Date: Fri, 30 Mar 2012 12:28:32 -0700
+Subject: [PATCH] Modify install names for library and include files
+
+Changing root name of library to json-c, and also the
+directory where header files are installed to .../jsdon-c/*.
+
+This avoids clashes with other implementations of JSON libraries.
+---
+ Makefile.am  | 10 +++++-----
+ configure.in |  2 +-
+ json-c.pc.in | 11 +++++++++++
+ json.pc.in   | 11 -----------
+ 4 files changed, 17 insertions(+), 17 deletions(-)
+ create mode 100644 json-c.pc.in
+ delete mode 100644 json.pc.in
+
+diff --git a/Makefile.am b/Makefile.am
+index 7f1abb1..eafaf6a 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -2,12 +2,12 @@ AM_CFLAGS = -Wall -Wwrite-strings -Werror -std=gnu99 -D_GNU_SOURCE -D_REENTRANT
+ 
+ EXTRA_DIST = README.html README-WIN32.html config.h.win32 doc json-c.vcproj
+ 
+-lib_LTLIBRARIES = libjson.la
++lib_LTLIBRARIES = libjson-c.la
+ 
+ pkgconfigdir = $(libdir)/pkgconfig
+-pkgconfig_DATA = json.pc
++pkgconfig_DATA = json-c.pc
+ 
+-libjsonincludedir = $(includedir)/json
++libjsonincludedir = $(includedir)/json-c
+ libjsoninclude_HEADERS = \
+ 	arraylist.h \
+ 	bits.h \
+@@ -27,9 +27,9 @@ libjsoninclude_HEADERS = \
+ #libjsonx_include_HEADERS = \
+ #	json_config.h
+ 
+-libjson_la_LDFLAGS = -version-info 0:1:0
++libjson_c_la_LDFLAGS = -version-info 0:1:0
+ 
+-libjson_la_SOURCES = \
++libjson_c_la_SOURCES = \
+ 	arraylist.c \
+ 	debug.c \
+ 	json_object.c \
+diff --git a/configure.in b/configure.in
+index 49b3195..df0d82b 100644
+--- a/configure.in
++++ b/configure.in
+@@ -31,5 +31,5 @@ AM_PROG_LIBTOOL
+ 
+ AC_OUTPUT([
+ Makefile
+-json.pc
++json-c.pc
+ ])
+diff --git a/json-c.pc.in b/json-c.pc.in
+new file mode 100644
+index 0000000..037739d
+--- /dev/null
++++ b/json-c.pc.in
+@@ -0,0 +1,11 @@
++prefix=@prefix@
++exec_prefix=@exec_prefix@
++libdir=@libdir@
++includedir=@includedir@
++
++Name: json-c
++Description: JSON implementation in C
++Version: @VERSION@
++Requires: 
++Libs:  -L${libdir} -ljson-c
++Cflags: -I${includedir}/json-c
+diff --git a/json.pc.in b/json.pc.in
+deleted file mode 100644
+index b3d140b..0000000
+--- a/json.pc.in
++++ /dev/null
+@@ -1,11 +0,0 @@
+-prefix=@prefix@
+-exec_prefix=@exec_prefix@
+-libdir=@libdir@
+-includedir=@includedir@
+-
+-Name: json
+-Description: JSON implementation in C
+-Version: @VERSION@
+-Requires: 
+-Libs:  -L${libdir} -ljson
+-Cflags: -I${includedir}/json
+-- 
+1.8.1.1
+
