@@ -152,8 +152,8 @@ src_compile() {
 src_install() {
 	cmake-utils_src_install
 
-	doicon -s 256 "${FILESDIR}/${PN}.png"
-	make_desktop_entry "${GAMES_BINDIR}/desura" "Desurium"
+	newicon -s scalable "${S}/src/branding_${PN}/sources/desubot.svg" "${PN}.svg"
+	make_desktop_entry "${GAMES_BINDIR}/desura" "Desurium" "${PN}"
 
 	prepgamesdirs
 }
