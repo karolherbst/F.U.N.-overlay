@@ -1,10 +1,10 @@
 # Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.22.ebuild,v 1.1 2013/01/20 02:27:14 tetromino Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.23-r1.ebuild,v 1.2 2013/02/05 15:24:10 tetromino Exp $
 
 EAPI="5"
 
-inherit autotools eutils flag-o-matic gnome2-utils multilib pax-utils
+inherit autotools eutils flag-o-matic gnome2-utils multilib pax-utils toolchain-funcs
 
 if [[ ${PV} == "9999" ]] ; then
 	EGIT_REPO_URI="git://source.winehq.org/git/wine.git"
@@ -20,7 +20,7 @@ fi
 
 GV="1.9"
 MV="0.0.8"
-PULSE_PATCHES="winepulse-patches-1.5.22"
+PULSE_PATCHES="winepulse-patches-1.5.23"
 WINE_GENTOO="wine-gentoo-2012.11.24"
 DESCRIPTION="Free implementation of Windows(tm) on Unix"
 HOMEPAGE="http://www.winehq.org/"
@@ -35,7 +35,7 @@ SRC_URI="${SRC_URI}
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-IUSE="alsa capi cups custom-cflags elibc_glibc fontconfig +gecko gnutls gphoto2 gsm gstreamer jpeg lcms ldap +mono mp3 ncurses nls odbc openal opencl +opengl osmesa +oss +perl png +prelink samba scanner selinux ssl test +threads +truetype udisks v4l +win32 +win64 +X xcomposite xinerama xml"
+IUSE="alsa capi cups custom-cflags elibc_glibc fontconfig +gecko gphoto2 gsm gstreamer jpeg lcms ldap +mono mp3 ncurses nls odbc openal opencl +opengl osmesa +oss +perl png +prelink samba scanner selinux ssl test +threads +truetype udisks v4l +win32 +win64 +X xcomposite xinerama xml"
 [[ ${PV} == "9999" ]] || IUSE="${IUSE} pulseaudio"
 REQUIRED_USE="elibc_glibc? ( threads )
 	mono? ( || ( win32 !win64 ) )
@@ -69,7 +69,6 @@ RDEPEND="truetype? ( >=media-libs/freetype-2.0.0 media-fonts/corefonts )
 		sys-apps/dbus
 		sys-fs/udisks:2
 	)
-	gnutls? ( net-libs/gnutls:= )
 	gstreamer? ( media-libs/gstreamer:0.10 media-libs/gst-plugins-base:0.10 )
 	X? (
 		x11-libs/libXcursor
@@ -99,7 +98,9 @@ RDEPEND="truetype? ( >=media-libs/freetype-2.0.0 media-fonts/corefonts )
 	selinux? ( sec-policy/selinux-wine )
 	xml? ( dev-libs/libxml2 dev-libs/libxslt )
 	scanner? ( media-gfx/sane-backends:= )
-	ssl? ( dev-libs/openssl:= )
+	ssl? (
+		dev-libs/openssl:=
+		net-libs/gnutls:= )
 	png? ( media-libs/libpng:= )
 	v4l? ( media-libs/libv4l )
 	!win64? ( ${MLIB_DEPS} )
@@ -155,6 +156,7 @@ src_prepare() {
 	epatch "${FILESDIR}"/${PN}-1.1.15-winegcc.patch #260726
 	epatch "${FILESDIR}"/${PN}-1.4_rc2-multilib-portage.patch #395615
 	epatch "${FILESDIR}"/${PN}-1.5.17-osmesa-check.patch #429386
+	epatch "${FILESDIR}"/${PN}-1.5.23-winebuild-CCAS.patch #455308
 	epatch "${FILESDIR}"/${PN}-bigger-shader.patch
     epatch "${FILESDIR}"/${PN}-crysis-mem-leak.patch
 	epatch "${FILESDIR}"/${PN}-conviction-hack.patch
@@ -191,7 +193,7 @@ do_configure() {
 		$(use_with ncurses curses) \
 		$(use_with udisks dbus) \
 		$(use_with fontconfig) \
-		$(use_with gnutls) \
+		$(use_with ssl gnutls) \
 		$(use_with gphoto2 gphoto) \
 		$(use_with gsm) \
 		$(use_with gstreamer) \
@@ -218,6 +220,7 @@ do_configure() {
 		$(use_with xinerama) \
 		$(use_with xml) \
 		$(use_with xml xslt) \
+		CCAS="$(tc-getAS)" \
 		$2
 
 	emake ${MAKEOPTS} depend
