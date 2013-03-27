@@ -119,8 +119,7 @@ src_configure() {
 		-DBINDIR="${GAMES_BINDIR}"
 		-DDATADIR="${GAMES_DATADIR}"
 		-DRUNTIME_LIBDIR="$(games_get_libdir)"
-		-DDESKTOPDIR="/usr/share/applications"
-		-DINSTALL_DESKTOP_FILE=TRUE
+		-DINSTALL_DESKTOP_FILE=FALSE
 		-DDESKTOP_EXE=desura
 		-DDESKTOP_ICON=desurium
 		$(cmake-utils_use bundled-wxgtk FORCE_BUNDLED_WXGTK)
@@ -138,6 +137,7 @@ src_install() {
 	cmake-utils_src_install
 
 	newicon -s scalable "${S}/src/branding_${PN}/sources/desubot.svg" "${PN}.svg"
+	domenu "${BUILD_DIR}/desura.desktop"
 
 	prepgamesdirs
 }
