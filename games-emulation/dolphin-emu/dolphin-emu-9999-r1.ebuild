@@ -21,7 +21,7 @@ RDEPEND=">=media-libs/glew-1.5
 	>=media-libs/libsdl-1.2[joystick]
 	sys-libs/readline
 	x11-libs/libXext
-	<media-libs/libsfml-2.0
+	media-libs/libsfml
 	ao? ( media-libs/libao )
 	alsa? ( media-libs/alsa-lib )
 	bluetooth? ( net-wireless/bluez )
