@@ -1,6 +1,6 @@
 # Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.26.ebuild,v 1.1 2013/03/18 03:28:57 tetromino Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.27.ebuild,v 1.1 2013/03/31 03:40:03 tetromino Exp $
 
 EAPI="5"
 
@@ -88,9 +88,7 @@ RDEPEND="truetype? ( >=media-libs/freetype-2.0.0 media-fonts/corefonts )
 	selinux? ( sec-policy/selinux-wine )
 	xml? ( dev-libs/libxml2 dev-libs/libxslt )
 	scanner? ( media-gfx/sane-backends:= )
-	ssl? (
-		dev-libs/openssl:0=
-		net-libs/gnutls:= )
+	ssl? ( net-libs/gnutls:= )
 	png? ( media-libs/libpng:0= )
 	v4l? ( media-libs/libv4l )
 	xcomposite? ( x11-libs/libXcomposite )
@@ -170,6 +168,7 @@ src_prepare() {
 		"${FILESDIR}"/2-XInputGetState.patch
 		"${FILESDIR}"/3-XInputGetState.patch
 		"${FILESDIR}"/4-XInputGetState.patch
+		"${FILESDIR}"/${PN}-saintsrow-the-third.patch # winehq: 31918
 	)
 	[[ ${PV} == "9999" ]] || PATCHES+=(
 		"../${PULSE_PATCHES}"/*.patch #421365
