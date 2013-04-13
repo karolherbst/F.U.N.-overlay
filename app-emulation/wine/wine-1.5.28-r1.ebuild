@@ -168,7 +168,6 @@ src_prepare() {
 		"${FILESDIR}"/2-XInputGetState.patch
 		"${FILESDIR}"/3-XInputGetState.patch
 		"${FILESDIR}"/4-XInputGetState.patch
-		"${FILESDIR}"/${PN}-saintsrow-the-third.patch # winehq: 31918
 	)
 	[[ ${PV} == "9999" ]] || PATCHES+=(
 		"../${PULSE_PATCHES}"/*.patch #421365
