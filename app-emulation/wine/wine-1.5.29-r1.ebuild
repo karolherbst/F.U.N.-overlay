@@ -1,6 +1,6 @@
 # Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.27.ebuild,v 1.1 2013/03/31 03:40:03 tetromino Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.28.ebuild,v 1.1 2013/04/14 00:32:20 tetromino Exp $
 
 EAPI="5"
 
@@ -228,7 +228,6 @@ src_configure() {
 		$(use_with openal)
 		$(use_with opencl)
 		$(use_with opengl)
-		$(use_with ssl openssl)
 		$(use_with osmesa)
 		$(use_with oss)
 		$(use_with png)

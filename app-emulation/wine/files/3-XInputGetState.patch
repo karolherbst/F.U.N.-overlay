@@ -10,14 +10,16 @@ index 4b7612d..f63359d 100644
  static const unsigned int axes[WINE_XINPUT_AXES]        = {ABS_X, ABS_Y, ABS_Z, ABS_RX, ABS_RY, ABS_RZ, ABS_HAT0X, ABS_HAT0Y};
  static const unsigned int jbuttons[WINE_XINPUT_BUTTONS] = {BTN_START, BTN_BACK, BTN_THUMBL, BTN_THUMBR, BTN_TL, BTN_TR, BTN_A, BTN_B, BTN_X, BTN_Y};
  static const unsigned int xbuttons[WINE_XINPUT_BUTTONS] = {XINPUT_GAMEPAD_START, XINPUT_GAMEPAD_BACK, XINPUT_GAMEPAD_LEFT_THUMB, XINPUT_GAMEPAD_RIGHT_THUMB, XINPUT_GAMEPAD_LEFT_SHOULDER, XINPUT_GAMEPAD_RIGHT_SHOULDER, XINPUT_GAMEPAD_A, XINPUT_GAMEPAD_B, XINPUT_GAMEPAD_X, XINPUT_GAMEPAD_Y};
-@@ -219,6 +220,7 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved)
+@@ -219,6 +220,9 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved)
+     case DLL_PROCESS_ATTACH:
          DisableThreadLibraryCalls(inst);
          break;
-     case DLL_PROCESS_DETACH:
++    case DLL_PROCESS_DETACH:
 +        XInputEnable(0);
-         break;
++        break;
      }
      return TRUE;
+ }
 @@ -230,7 +232,22 @@ void WINAPI XInputEnable(BOOL enable)
      to the controllers. Setting to true will send the last vibration
      value (sent to XInputSetState) to the controller and allow messages to
