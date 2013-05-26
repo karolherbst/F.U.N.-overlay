@@ -1,6 +1,6 @@
 # Copyright 1999-2013 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.30.ebuild,v 1.1 2013/05/13 07:19:51 tetromino Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.5.31.ebuild,v 1.1 2013/05/26 04:27:24 tetromino Exp $
 
 EAPI="5"
 
@@ -22,7 +22,7 @@ else
 	S=${WORKDIR}/${MY_P}
 fi
 
-GV="1.9"
+GV="2.21"
 MV="0.0.8"
 PULSE_PATCHES="winepulse-patches-1.5.30"
 WINE_GENTOO="wine-gentoo-2012.11.24"
@@ -97,7 +97,10 @@ RDEPEND="truetype? ( >=media-libs/freetype-2.0.0 media-fonts/corefonts )
 	xcomposite? ( x11-libs/libXcomposite )
 	amd64? (
 		abi_x86_32? (
-			gstreamer? ( app-emulation/emul-linux-x86-gstplugins )
+			gstreamer? (
+				app-emulation/emul-linux-x86-gstplugins
+				app-emulation/emul-linux-x86-medialibs[development]
+			)
 			truetype? ( >=app-emulation/emul-linux-x86-xlibs-2.1[development] )
 			X? (
 				>=app-emulation/emul-linux-x86-xlibs-2.1[development]
@@ -173,7 +176,7 @@ src_prepare() {
 		"${FILESDIR}"/2-XInputGetState.patch
 		"${FILESDIR}"/3-XInputGetState.patch
 		"${FILESDIR}"/4-XInputGetState.patch
-		"${FILESDIR}"/wine-1.5.30-libwine.patch
+		"${FILESDIR}"/${PN}-1.5.31-gnutls-3.2.0.patch #http://bugs.winehq.org/show_bug.cgi?id=33649
 	)
 	[[ ${PV} == "9999" ]] || PATCHES+=(
 		"../${PULSE_PATCHES}"/*.patch #421365
