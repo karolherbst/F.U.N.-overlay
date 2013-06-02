@@ -1,0 +1,34 @@
+From 31e6070f872fc5ac99f49a00631608d1e6fa5890 Mon Sep 17 00:00:00 2001
+From: Karol Herbst <git@karolherbst.de>
+Date: Sun, 2 Jun 2013 10:36:55 +0200
+Subject: [PATCH] fix ICC compatibility
+
+---
+ Source/Core/Common/Src/CommonFuncs.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Source/Core/Common/Src/CommonFuncs.h b/Source/Core/Common/Src/CommonFuncs.h
+index 710c209..24286ab 100644
+--- a/Source/Core/Common/Src/CommonFuncs.h
++++ b/Source/Core/Common/Src/CommonFuncs.h
+@@ -22,7 +22,7 @@ template<> struct CompileTimeAssert<true> {};
+ #define b32(x)  (b16(x) | (b16(x) >>16) )
+ #define ROUND_UP_POW2(x)	(b32(x - 1) + 1)
+ 
+-#if defined __GNUC__ && !defined __SSSE3__ && !defined _M_GENERIC
++#if defined __GNUC__ && !defined __SSSE3__ && !defined _M_GENERIC && !defined __ICC
+ #include <emmintrin.h>
+ static __inline __m128i __attribute__((__always_inline__))
+ _mm_shuffle_epi8(__m128i a, __m128i mask)
+@@ -55,7 +55,7 @@ _mm_shuffle_epi8(__m128i a, __m128i mask)
+ 	#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+ // GCC 4.8 defines all the rotate functions now
+ // Small issue with GCC's lrotl/lrotr intrinsics is they are still 32bit while we require 64bit
+-#ifndef _rotl
++#if !defined _rotl && !defined __ICC
+ inline u32 _rotl(u32 x, int shift) {
+ 	shift &= 31;
+ 	if (!shift) return x;
+-- 
+1.8.2.1
+

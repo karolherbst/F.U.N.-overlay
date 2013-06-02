@@ -44,6 +44,10 @@ DEPEND="${RDEPEND}
 	dev-util/pkgconfig
 	media-gfx/nvidia-cg-toolkit"
 
+src_prepare() {
+	epatch "${FILESDIR}/ICC-compatibility.patch"
+}
+
 src_configure() {
 	LDFLAGS=-L/opt/nvidia-cg-toolkit/lib
 	# filter problematic compiler flags
