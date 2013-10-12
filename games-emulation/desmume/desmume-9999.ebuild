@@ -14,7 +14,7 @@ ESVN_PROJECT="desmume"
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS=""
-IUSE="openal gtk glade osmesa nls wifi wxwidgets"
+IUSE="openal gtk glade osmesa nls wifi"
 
 DEPEND="virtual/opengl
     dev-vcs/subversion[webdav-neon]
@@ -30,8 +30,7 @@ DEPEND="virtual/opengl
 	glade? ( gnome-base/libglade
 		x11-libs/gtkglext )
 	osmesa? ( media-libs/mesa[osmesa] )
-	wifi? ( net-libs/libpcap )
-	wxwidgets? ( x11-libs/wxGTK )"
+	wifi? ( net-libs/libpcap )"
 RDEPEND="virtual/opengl
     sys-libs/zlib
     dev-libs/zziplib
@@ -45,16 +44,15 @@ RDEPEND="virtual/opengl
     glade? ( gnome-base/libglade
         x11-libs/gtkglext )
     osmesa? ( media-libs/mesa[osmesa] )
-    wifi? ( net-libs/libpcap )
-    wxwidgets? ( x11-libs/wxGTK )"
+    wifi? ( net-libs/libpcap )"
 
 src_prepare() {
 	use wifi && \
 		eerror "wifi support is broken and may not work"
 	
-	if ! use gtk && $(use glade || use wxwidgets); then
-		einfo "glade or wxwidgets support was requested but not gtk"
-		einfo "both glade(libglade) and wxwidgets(wxGTK) depend on gtk"
+	if ! use gtk && $(use glade); then
+		einfo "glade support was requested but not gtk"
+		einfo "glade(libglade) depends on gtk"
 		einfo "it may be usefull to enable gtk support after all"
 	fi
 
@@ -71,7 +69,6 @@ src_configure() {
 		$(use_enable osmesa) \
 		$(use_enable nls) \
 		$(use_enable wifi) \
-		$(use_enable wxwidgets) \
 		|| die "egamesconf failed"
 }
 
@@ -82,9 +79,6 @@ src_install() {
 	fi
 	if ! use glade; then
 		[ -f "${D}/${GAMES_BINDIR}/desmume-glade" ] && rm "${D}/${GAMES_BINDIR}/desmume-glade"
-	fi
-	if ! use wxwidgets; then
-		[ -f "${D}/${GAMES_BINDIR}/wxdesmume" ] && rm "${D}/${GAMES_BINDIR}/wxdesmume"
 	fi
 	dodoc AUTHORS ChangeLog README README.LIN
 	prepgamesdirs
