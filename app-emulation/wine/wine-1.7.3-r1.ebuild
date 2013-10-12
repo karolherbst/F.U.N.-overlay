@@ -181,9 +181,11 @@ src_prepare() {
 		"${FILESDIR}"/3-XInputGetState.patch
 		"${FILESDIR}"/4-XInputGetState.patch
 	)
-	[[ ${PV} == "9999" ]] || PATCHES+=(
-		"../${PULSE_PATCHES}"/*.patch #421365
-	)
+	if use pulseaudio; then
+		[[ ${PV} == "9999" ]] || PATCHES+=(
+			"../${PULSE_PATCHES}"/*.patch #421365
+		)
+	fi
 
 	autotools-utils_src_prepare
 
