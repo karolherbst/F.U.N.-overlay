@@ -72,7 +72,7 @@ src_install() {
 		dobin "${FILESDIR}"/ppssppqt
 		exeinto /usr/share/games/"${PN}"
 		doexe "${WORKDIR}"/"${P}"/Qt/PPSSPPQt
-	else
+	fi
 		into /usr/games
 		dobin "${FILESDIR}"/ppssppsdl
 		exeinto /usr/share/games/"${PN}"
@@ -80,5 +80,4 @@ src_install() {
 		insinto /usr/share/games/"${PN}"
 		doins -r "${WORKDIR}"/"${P}"_build/assets
 		doins -r "${WORKDIR}"/"${P}"/lang
-	fi
 }
