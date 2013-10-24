@@ -14,7 +14,7 @@ SRC_URI=""
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="atrac qt4 sdl"
+IUSE="qt4 sdl"
 
 RDEPEND=""
 DEPEND="sys-libs/zlib
@@ -68,16 +68,16 @@ src_compile() {
 
 src_install() {
 	if use qt4 ; then
-		into "${D}"/usr/games
+		into /usr/games
 		dobin "${FILESDIR}"/ppssppqt
-		exeinto "${D}"/usr/share/games/"${PN}"
+		exeinto /usr/share/games/"${PN}"
 		doexe "${WORKDIR}"/"${P}"/Qt/PPSSPPQt
 	else
-		into "${D}"/usr/games
+		into /usr/games
 		dobin "${FILESDIR}"/ppssppsdl
-		exeinto "${D}"/usr/share/games/"${PN}"
+		exeinto /usr/share/games/"${PN}"
 		doexe "${WORKDIR}"/"${P}"_build/PPSSPPSDL
-		insinto "${D}"/usr/share/games/"${PN}"
+		insinto /usr/share/games/"${PN}"
 		doins -r "${WORKDIR}"/"${P}"_build/assets
 		doins -r "${WORKDIR}"/"${P}"/lang
 	fi
