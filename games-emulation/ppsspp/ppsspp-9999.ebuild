@@ -36,7 +36,7 @@ src_unpack() {
 		cmake-utils_src_unpack
 	fi
 }
-	
+
 src_prepare() {
 	git submodule update --init
 	if use qt4 ; then
@@ -78,7 +78,6 @@ src_install() {
 		exeinto /usr/share/games/"${PN}"
 		doexe "${WORKDIR}"/"${P}"_build/PPSSPPSDL
 		insinto /usr/share/games/"${PN}"
-	fi
 		doins -r "${WORKDIR}"/"${P}"_build/assets
 		doins -r "${WORKDIR}"/"${P}"/lang
 }
