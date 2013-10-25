@@ -80,4 +80,5 @@ src_install() {
 		insinto /usr/share/games/"${PN}"
 		doins -r "${WORKDIR}"/"${P}"_build/assets
 		doins -r "${WORKDIR}"/"${P}"/lang
+	fi
 }
