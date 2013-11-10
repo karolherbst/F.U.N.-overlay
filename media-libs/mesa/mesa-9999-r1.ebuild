@@ -97,10 +97,11 @@ RDEPEND="
 	dev-libs/expat[${MULTILIB_USEDEP}]
 	gbm? ( virtual/udev[${MULTILIB_USEDEP}] )
 	>=x11-libs/libX11-1.3.99.901[${MULTILIB_USEDEP}]
+	>=x11-libs/libxshmfence-1.0[${MULTILIB_USEDEP}]
 	x11-libs/libXdamage[${MULTILIB_USEDEP}]
 	x11-libs/libXext[${MULTILIB_USEDEP}]
 	x11-libs/libXxf86vm[${MULTILIB_USEDEP}]
-	>=x11-libs/libxcb-1.8.1[${MULTILIB_USEDEP}]
+	>=x11-libs/libxcb-1.9.2[${MULTILIB_USEDEP}]
 	opencl? (
 				app-admin/eselect-opencl
 				dev-libs/libclc
@@ -137,6 +138,8 @@ DEPEND="${RDEPEND}
 	sys-devel/flex
 	virtual/pkgconfig
 	>=x11-proto/dri2proto-2.6[${MULTILIB_USEDEP}]
+	>=x11-proto/dri3proto-1.0[${MULTILIB_USEDEP}]
+	>=x11-proto/presentproto-1.0[${MULTILIB_USEDEP}]
 	>=x11-proto/glproto-1.4.15-r1[${MULTILIB_USEDEP}]
 	>=x11-proto/xextproto-7.0.99.1[${MULTILIB_USEDEP}]
 	x11-proto/xf86driproto[${MULTILIB_USEDEP}]
@@ -223,18 +226,17 @@ multilib_src_configure() {
 	fi
 
 	if use egl; then
-		myconf+="
-			--with-egl-platforms=x11$(use wayland && echo ",wayland")$(use gbm && echo ",drm")
-			$(use_enable gallium gallium-egl)
-		"
+		myconf+="--with-egl-platforms=x11$(use wayland && echo ",wayland")$(use gbm && echo ",drm") "
 	fi
 
 	if use gallium; then
 		myconf+="
 			$(use_enable llvm gallium-llvm)
 			$(use_enable openvg)
+			$(use_enable openvg gallium-egl)
 			$(use_enable r600-llvm-compiler)
 			$(use_enable vdpau)
+			$(use_enable xa)
 			$(use_enable xvmc)
 		"
 		gallium_enable video_cards_swrastg swrast
@@ -293,8 +295,6 @@ multilib_src_configure() {
 		$(use_enable nptl glx-tls) \
 		$(use_enable osmesa) \
 		$(use_enable !pic asm) \
-		$(use_enable xa) \
-		--disable-xorg \
 		--with-dri-drivers=${DRI_DRIVERS} \
 		--with-gallium-drivers=${GALLIUM_DRIVERS} \
 		--with-llvm-shared-libs \
