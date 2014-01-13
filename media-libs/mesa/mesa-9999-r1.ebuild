@@ -1,4 +1,4 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
@@ -65,7 +65,7 @@ REQUIRED_USE="
 	gles1?  ( egl )
 	gles2?  ( egl )
 	r600-llvm-compiler? ( gallium llvm || ( video_cards_r600 video_cards_radeonsi video_cards_radeon ) )
-	wayland? ( egl )
+	wayland? ( egl gbm )
 	xa?  ( gallium )
 	video_cards_freedreno?  ( gallium )
 	video_cards_intel?  ( || ( classic gallium ) )
