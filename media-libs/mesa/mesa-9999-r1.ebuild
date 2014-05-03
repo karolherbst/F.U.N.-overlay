@@ -86,7 +86,7 @@ REQUIRED_USE="
 	video_cards_swrastg?	( gallium llvm )
 "
 
-LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.52"
+LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.53"
 # keep correct libdrm and dri2proto dep
 # keep blocks in rdepend for binpkg
 RDEPEND="
@@ -145,6 +145,7 @@ for card in ${RADEON_CARDS}; do
 done
 
 DEPEND="${RDEPEND}
+	${PYTHON_DEPS}
 	llvm? (
 		r600-llvm-compiler? ( sys-devel/llvm[video_cards_radeon] )
 		video_cards_radeonsi? ( sys-devel/llvm[video_cards_radeon] )
