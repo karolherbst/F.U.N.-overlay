@@ -282,6 +282,7 @@ src_prepare() {
 		"${FILESDIR}"/2-XInputGetState.patch
 		"${FILESDIR}"/3-XInputGetState.patch
 		"${FILESDIR}"/4-XInputGetState.patch
+		"${FILESDIR}"/${P}-cs-0.8.patch
 	)
 	use pulseaudio && PATCHES+=(
 		"../${PULSE_PATCHES}"/*.patch #421365
