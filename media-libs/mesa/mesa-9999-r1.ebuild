@@ -151,7 +151,7 @@ DEPEND="${RDEPEND}
 		video_cards_radeonsi? ( sys-devel/llvm[video_cards_radeon] )
 	)
 	opencl? (
-				>=sys-devel/llvm-3.3-r3[video_cards_radeon,${MULTILIB_USEDEP}]
+				>=sys-devel/llvm-3.3-r3[${MULTILIB_USEDEP}]
 				>=sys-devel/clang-3.3[${MULTILIB_USEDEP}]
 				>=sys-devel/gcc-4.6
 	)
@@ -400,6 +400,12 @@ multilib_src_install() {
 		fi
 		eend $?
 	fi
+
+	if use openmax; then
+		echo "XDG_DATA_DIRS=\"${EPREFIX}/usr/share/mesa/xdg\"" > "${T}/99mesaxdgomx"
+		doenvd "${T}"/99mesaxdgomx
+		keepdir /usr/share/mesa/xdg
+	fi
 }
 
 multilib_src_install_all() {
@@ -448,6 +454,15 @@ pkg_postinst() {
 		eselect opencl set --use-old ${PN}
 	fi
 
+	# run omxregister-bellagio to make the OpenMAX drivers known system-wide
+	if use openmax; then
+		ebegin "Registering OpenMAX drivers"
+		BELLAGIO_SEARCH_PATH="${EPREFIX}/usr/$(get_libdir)/libomxil-bellagio0" \
+			OMX_BELLAGIO_REGISTRY=${EPREFIX}/usr/share/mesa/xdg/.omxregister \
+			omxregister-bellagio
+		eend $?
+	fi
+
 	# warn about patent encumbered texture-float
 	if use !bindist; then
 		elog "USE=\"bindist\" was not set. Potentially patent encumbered code was"
@@ -466,6 +481,12 @@ pkg_postinst() {
 		elog "Note that in order to have full S3TC support, it is necessary to install"
 		elog "media-libs/libtxc_dxtn as well. This may be necessary to get nice"
 		elog "textures in some apps, and some others even require this to run."
+	fi
+}
+
+pkg_prerm() {
+	if use openmax; then
+		rm "${EPREFIX}"/usr/share/mesa/xdg/.omxregister
 	fi
 }
 
