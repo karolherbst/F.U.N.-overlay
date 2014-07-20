@@ -1,66 +1,59 @@
-# Copyright 1999-2011 Gentoo Foundation
+# Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-libs/alsa-lib/alsa-lib-1.0.24.1.ebuild,v 1.3 2011/02/17 17:26:29 sping Exp $
+# $Header: /var/cvsroot/gentoo-x86/media-libs/alsa-lib/alsa-lib-1.0.28.ebuild,v 1.3 2014/06/24 06:56:21 ssuominen Exp $
 
-EAPI=3
+EAPI=5
 
-PYTHON_DEPEND="python? 2"
+# no support for python3_2 or above yet wrt #471326
+PYTHON_COMPAT=( python2_7 )
 
-inherit eutils libtool python multilib autotools git-2
-
-MY_P=${P/_rc/rc}
-S=${WORKDIR}/${MY_P}
+inherit autotools eutils multilib multilib-minimal python-single-r1 git-r3
 
 DESCRIPTION="Advanced Linux Sound Architecture Library"
 HOMEPAGE="http://www.alsa-project.org/"
 SRC_URI=""
 EGIT_REPO_URI="git://git.alsa-project.org/alsa-lib.git"
-EGIT_PROJECT="alsa-lib"
 
 LICENSE="LGPL-2.1"
 SLOT="0"
 KEYWORDS=""
-IUSE="doc debug alisp python static-libs"
+IUSE="alisp debug doc elibc_uclibc python"
 
-DEPEND=">=media-sound/alsa-headers-1.0.24
+RDEPEND="python? ( ${PYTHON_DEPS} )
+	abi_x86_32? (
+		!<=app-emulation/emul-linux-x86-soundlibs-20130224-r1
+		!app-emulation/emul-linux-x86-soundlibs[-abi_x86_32(-)]
+	)"
+DEPEND="${RDEPEND}
 	doc? ( >=app-doc/doxygen-1.2.6 )"
-RDEPEND=""
 
-IUSE_PCM_PLUGIN="copy linear route mulaw alaw adpcm rate plug multi shm file
-null empty share meter mmap_emul hooks lfloat ladspa dmix dshare dsnoop asym iec958
-softvol extplug ioplug"
-
-for plugin in ${IUSE_PCM_PLUGIN}; do
-	IUSE="${IUSE} alsa_pcm_plugins_${plugin}"
-done
+REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
 
 pkg_setup() {
-	if [ -z "${ALSA_PCM_PLUGINS}" ] ; then
-		ewarn "You haven't selected _any_ PCM plugins. Either you set it to something like the default"
-		ewarn "(which is being set in the profile UNLESS you unset them) or alsa based applications"
-		ewarn "are going to *misbehave* !"
-		epause 5
-	fi
-
-	if use python; then
-		python_set_active_version 2
-	fi
+	use python && python-single-r1_pkg_setup
 }
 
-src_unpack() {
-	git-2_src_unpack
-	cd "${S}"
-	elibtoolize
-        epunt_cxx
+src_prepare() {
+	find . -name Makefile.am -exec sed -i -e '/CFLAGS/s:-g -O2::' {} + || die
+	# http://bugs.gentoo.org/509886
+	use elibc_uclibc && { sed -i -e 's:oldapi queue_timer:queue_timer:' test/Makefile.am || die; }
+	epatch_user
 	eautoreconf
 }
 
-src_configure() {
+multilib_src_configure() {
 	local myconf
-	use elibc_uclibc && myconf="--without-versioned"
+	# enable Python only on final ABI
+	if multilib_is_native_abi; then
+		myconf="$(use_enable python)"
+	else
+		myconf="--disable-python"
+	fi
+	use elibc_uclibc && myconf+=" --without-versioned"
 
+	ECONF_SOURCE=${S} \
 	econf \
-		$(use_enable static-libs static) \
+		--disable-maintainer-mode \
 		--enable-shared \
 		--disable-resmgr \
 		--enable-rawmidi \
@@ -68,37 +61,28 @@ src_configure() {
 		--enable-aload \
 		$(use_with debug) \
 		$(use_enable alisp) \
-		$(use_enable python) \
-		--with-pcm-plugins="${ALSA_PCM_PLUGINS}" \
-		--disable-dependency-tracking \
 		${myconf}
 }
 
-src_compile() {
-	emake || die
+multilib_src_compile() {
+	emake
 
-	if use doc; then
-		emake doc || die "failed to generate docs"
-		fgrep -Zrl "${S}" "${S}/doc/doxygen/html" | \
+	if multilib_is_native_abi && use doc; then
+		emake doc
+		fgrep -Zrl "${S}" doc/doxygen/html | \
 			xargs -0 sed -i -e "s:${S}::"
 	fi
 }
 
-src_install() {
-	emake DESTDIR="${D}" install || die
+multilib_src_install() {
+	emake DESTDIR="${D}" install
+	if multilib_is_native_abi && use doc; then
+		dohtml -r doc/doxygen/html/.
+	fi
+}
 
-	find "${ED}" -name '*.la' -exec rm -f {} +
+multilib_src_install_all() {
+	prune_libtool_files --all
 	find "${ED}"/usr/$(get_libdir)/alsa-lib -name '*.a' -exec rm -f {} +
-
-	dodoc ChangeLog TODO || die
-	use doc && dohtml -r doc/doxygen/html/*
+	dodoc ChangeLog doc/asoundrc.txt NOTES TODO
 }
-
-pkg_postinst() {
-	elog "Please try in-kernel ALSA drivers instead of the alsa-driver ebuild."
-	elog "If alsa-driver works for you where a *recent* kernel does not, we want "
-	elog "to know about this. Our e-mail address is alsa-bugs@gentoo.org"
-	elog "However, if you notice no sound output or instability, please try to "
-	elog "upgrade your kernel to a newer version first."
-}
-
