@@ -17,7 +17,10 @@ KEYWORDS=""
 IUSE="openal gtk glade osmesa nls wifi"
 
 DEPEND="virtual/opengl
-    dev-vcs/subversion[webdav-neon]
+    || (
+		dev-vcs/subversion[webdav-neon]
+		dev-vcs/subversion[http]
+	)
 	sys-libs/zlib
 	dev-libs/zziplib
 	media-libs/libsdl[joystick]
