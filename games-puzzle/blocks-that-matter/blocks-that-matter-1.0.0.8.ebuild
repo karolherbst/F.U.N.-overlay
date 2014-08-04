@@ -8,7 +8,7 @@ MY_ARCH="${ARCH/amd64/x64}"
 
 inherit eutils games java-pkg-2
 
-DESCRIPTION="You are the Tetrobot: a tiny robot that can drill blocks of matter one by one, collect them, and recycle them into new pieces of 4 blocks."
+DESCRIPTION="You are the Tetrobot: a tiny robot that can drill blocks of matter"
 HOMEPAGE="http://www.swingswingsubmarine.com/"
 
 HIBPAGE="http://www.humblebundle.com"

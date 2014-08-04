@@ -6,7 +6,7 @@ EAPI=5
 
 inherit cmake-utils
 
-DESCRIPTION="VDPAU driver with VA-API/OpenGL backend."
+DESCRIPTION="VDPAU driver with VA-API/OpenGL backend"
 HOMEPAGE="https://github.com/i-rinat/libvdpau-va-gl/"
 SRC_URI="https://github.com/i-rinat/${PN}/archive/v${PV}.tar.gz"
 

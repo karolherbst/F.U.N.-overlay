@@ -6,7 +6,7 @@ EAPI="4"
 
 inherit linux-mod
 
-DESCRIPTION="A reverse engineering driver for the Clevo P150EM/P170EM/P150SM/P157SM/P170SM/P177SM backlight keyboard"
+DESCRIPTION="A driver for the Clevo P150EM/P170EM/P150SM/P157SM/P170SM/P177SM backlight keyboard"
 HOMEPAGE="http://www.linux-onlineshop.de/forum/index.php?page=Thread&threadID=26"
 SRC_URI="http://www.linux-onlineshop.de/forum/index.php?page=Attachment&attachmentID=76&h=e1c3a51c297ded51bbddfac915ec65a050f576ca&s=b82ceafa7a0be87d9192dfd7c617261f027cde27 -> ${P}.tar.gz"
 

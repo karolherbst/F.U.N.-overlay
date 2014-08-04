@@ -6,7 +6,7 @@ EAPI=5
 
 inherit eutils cmake-utils qt4-r2 git-2
 
-DESCRIPTION="A PSP emulator for Android, Windows, Mac, Linux and Blackberry 10, written in C++."
+DESCRIPTION="A PSP emulator for Android, Windows, Mac, Linux and Blackberry 10, written in C++"
 HOMEPAGE="http://www.ppsspp.org/"
 EGIT_REPO_URI="git://github.com/hrydgard/ppsspp.git"
 SRC_URI=""
