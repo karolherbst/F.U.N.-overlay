@@ -17,7 +17,7 @@ KEYWORDS=""
 IUSE="openal gtk glade osmesa nls wifi"
 
 DEPEND="virtual/opengl
-    || (
+	|| (
 		dev-vcs/subversion[webdav-neon]
 		dev-vcs/subversion[http]
 	)
@@ -35,19 +35,19 @@ DEPEND="virtual/opengl
 	osmesa? ( media-libs/mesa[osmesa] )
 	wifi? ( net-libs/libpcap )"
 RDEPEND="virtual/opengl
-    sys-libs/zlib
-    dev-libs/zziplib
-    media-libs/libsdl[joystick]
-    x11-libs/agg
-    nls? ( virtual/libintl
-        sys-devel/gettext )
-    openal? ( media-libs/openal )
-    gtk? ( >=x11-libs/gtk+-2.8.0
-        x11-libs/gtkglext )
-    glade? ( gnome-base/libglade
-        x11-libs/gtkglext )
-    osmesa? ( media-libs/mesa[osmesa] )
-    wifi? ( net-libs/libpcap )"
+	sys-libs/zlib
+	dev-libs/zziplib
+	media-libs/libsdl[joystick]
+	x11-libs/agg
+	nls? ( virtual/libintl
+		sys-devel/gettext )
+	openal? ( media-libs/openal )
+	gtk? ( >=x11-libs/gtk+-2.8.0
+		x11-libs/gtkglext )
+	glade? ( gnome-base/libglade
+		x11-libs/gtkglext )
+	osmesa? ( media-libs/mesa[osmesa] )
+	wifi? ( net-libs/libpcap )"
 
 src_prepare() {
 	use wifi && \

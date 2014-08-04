@@ -43,22 +43,22 @@ pkg_setup() {
 }
 
 src_unpack() {
-        git-2_src_unpack
-        cd "${S}"
+		git-2_src_unpack
+		cd "${S}"
 }
 
 src_prepare() {
-        elibtoolize
-        epunt_cxx
-        aclocal -I m4
-        gettextize
-        rm Makefile.am configure.in;
-        mv Makefile.am~ Makefile.am
-        mv configure.in~ configure.in
-        aclocal -I m4
-        autoconf
-        autoheader
-        automake --add-missing --copy --foreign
+		elibtoolize
+		epunt_cxx
+		aclocal -I m4
+		gettextize
+		rm Makefile.am configure.in;
+		mv Makefile.am~ Makefile.am
+		mv configure.in~ configure.in
+		aclocal -I m4
+		autoconf
+		autoheader
+		automake --add-missing --copy --foreign
 }
 
 src_configure() {
