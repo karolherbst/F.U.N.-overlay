@@ -12,7 +12,7 @@ LICENSE="teamspeak3"
 
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-RESTRICT="mirror strip"
+RESTRICT="fetch mirror strip"
 IUSE="alsa pulseaudio"
 
 REQUIRED_USE="|| ( alsa pulseaudio )"
