@@ -24,7 +24,7 @@ RDEPEND="
 	dev-qt/qtcore:5
 	dev-qt/qtgui:5[accessibility]
 	dev-qt/qtnetwork:5
-	dev-qt/qtsql:5
+	dev-qt/qtsql:5[sqlite]
 	dev-qt/qtwidgets:5
 	sys-libs/glibc
 	sys-libs/zlib
@@ -46,7 +46,7 @@ pkg_nofetch() {
 src_prepare() {
 	# Remove the qt-libraries as they just cause trouble with the system's Qt, see bug #328807.
 	rm libQt* || die "Couldn't remove bundled Qt libraries."
-	rm -r accessible platforms sqldrivers qt.conf
+	rm -r accessible platforms sqldrivers qt.conf || die "Couldn't remove bundle Qt files."
 
 	# Remove unwanted soundbackends.
 	if ! use alsa ; then
