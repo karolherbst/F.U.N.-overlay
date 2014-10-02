@@ -62,9 +62,9 @@ Index: libdrm-2.4.23/radeon/radeon_bo_gem.c
 +#include <stropts.h>
 +#endif
 +
+ #include "libdrm.h"
  #include "xf86drm.h"
  #include "xf86atomic.h"
- #include "drm.h"
 Index: libdrm-2.4.23/xf86drm.c
 ===================================================================
 --- libdrm-2.4.23.orig/xf86drm.c
