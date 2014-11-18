@@ -49,11 +49,12 @@ for card in ${VIDEO_CARDS}; do
 done
 
 IUSE="${IUSE_VIDEO_CARDS}
-	bindist +classic debug +dri3 +egl +gallium +gbm gles1 gles2 +llvm +nptl
-	opencl openvg osmesa pax_kernel openmax pic r600-llvm-compiler selinux
+	bindist +classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 +llvm
+	+nptl opencl openvg osmesa pax_kernel openmax pic r600-llvm-compiler selinux
 	vaapi vdpau wayland xvmc xa kernel_FreeBSD"
 
 REQUIRED_USE="
+	d3d9? ( gallium dri3 video_cards_swrastg )
 	llvm?   ( gallium )
 	openvg? ( egl gallium )
 	opencl? (
@@ -257,9 +258,9 @@ multilib_src_configure() {
 
 	if use gallium; then
 		myconf+="
+			$(use_enable d3d9 nine)
 			$(use_enable llvm gallium-llvm)
 			$(use_enable openvg)
-			$(use_enable openvg gallium-egl)
 			$(use_enable openmax omx)
 			$(use_enable r600-llvm-compiler)
 			$(use_enable vaapi va)
@@ -316,6 +317,7 @@ multilib_src_configure() {
 		--enable-glx \
 		--enable-shared-glapi \
 		$(use_enable !bindist texture-float) \
+		$(use_enable d3d9 nine) \
 		$(use_enable debug) \
 		$(use_enable dri3) \
 		$(use_enable egl) \
