@@ -40,7 +40,7 @@ SRC_URI="${SRC_URI}
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cups custom-cflags dos elibc_glibc +fontconfig +gecko gphoto2 gsm gstreamer +jpeg lcms ldap +mono mp3 ncurses netapi nls odbc openal opencl +opengl osmesa oss +perl pipelight +png +prelink pulseaudio +realtime +run-exes samba scanner selinux +ssl test +threads +truetype +udisks v4l +X xcomposite xinerama +xml"
+IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cups custom-cflags d3dadapter dos elibc_glibc +fontconfig +gecko gphoto2 gsm gstreamer +jpeg lcms ldap +mono mp3 ncurses netapi nls odbc openal opencl +opengl osmesa oss +perl pipelight +png +prelink pulseaudio +realtime +run-exes samba scanner selinux +ssl test +threads +truetype +udisks v4l +X xcomposite xinerama +xml"
 REQUIRED_USE="|| ( abi_x86_32 abi_x86_64 )
 	test? ( abi_x86_32 )
 	elibc_glibc? ( threads )
@@ -91,7 +91,11 @@ NATIVE_DEPEND="
 	ssl? ( net-libs/gnutls:= )
 	png? ( media-libs/libpng:0= )
 	v4l? ( media-libs/libv4l )
-	xcomposite? ( x11-libs/libXcomposite )"
+	xcomposite? ( x11-libs/libXcomposite )
+	d3dadapter? (
+		>=media-libs/mesa-10.4[d3d9]
+		x11-libs/libXfixes
+	)"
 
 COMMON_DEPEND="
 	!amd64? ( ${NATIVE_DEPEND} )
@@ -227,6 +231,13 @@ COMMON_DEPEND="
 				app-emulation/emul-linux-x86-xlibs[development,-abi_x86_32(-)]
 				>=x11-libs/libXcomposite-0.4.4-r1[abi_x86_32(-)]
 			) )
+			d3dadapter? ( || (
+				>=media-libs/mesa-10.4[abi_x86_32(-)]
+				|| (
+					app-emulation/emul-linux-x86-xlibs[development,-abi_x86_32(-)]
+					x11-libs/libXfixes[abi_x86_32(-)]
+				)
+			) )
 		)
 	)"
 
@@ -312,6 +323,9 @@ src_prepare() {
 		"${FILESDIR}"/4-XInputGetState.patch
 		"${FILESDIR}"/${PN}-ToUnicodeEx-dead-key.patch
 	)
+	if use d3dadapter; then
+		PATCHES+=( "${FILESDIR}"/${P}-d3d9adapter.patch )
+	fi
 	local COMPHOLIO_MAKE_ARGS="-W fonts-Missing_Fonts.ok"
 
 	use pulseaudio || COMPHOLIO_MAKE_ARGS="${COMPHOLIO_MAKE_ARGS} -W winepulse-PulseAudio_Support.ok"
@@ -406,6 +420,8 @@ multilib_src_configure() {
 		$(use_with xinerama)
 		$(use_with xml)
 		$(use_with xml xslt)
+		$(use_with d3dadapter)
+		$(use_with d3dadapter xfixes)
 	)
 
 	use pulseaudio && myconf+=( --with-pulse )
