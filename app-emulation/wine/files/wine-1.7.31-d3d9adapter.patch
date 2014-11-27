@@ -1,8 +1,17 @@
 diff --git a/configure b/configure
-index de03151..9248fa4 100755
+index de03151..5b8e3ce 100755
 --- a/configure
 +++ b/configure
-@@ -821,6 +821,7 @@ with_netapi
+@@ -677,6 +677,8 @@ XSLT_CFLAGS
+ XML2_LIBS
+ XML2_CFLAGS
+ LIBPCAP
++D3D_LIBS
++D3D_CFLAGS
+ X_EXTRA_LIBS
+ X_LIBS
+ X_PRE_LIBS
+@@ -821,6 +823,7 @@ with_netapi
  with_openal
  with_opencl
  with_opengl
@@ -10,7 +19,7 @@ index de03151..9248fa4 100755
  with_osmesa
  with_oss
  with_pcap
-@@ -831,6 +832,7 @@ with_tiff
+@@ -831,6 +834,7 @@ with_tiff
  with_v4l
  with_xcomposite
  with_xcursor
@@ -18,7 +27,7 @@ index de03151..9248fa4 100755
  with_xinerama
  with_xinput
  with_xinput2
-@@ -2099,6 +2101,7 @@ Optional Packages:
+@@ -2099,6 +2103,7 @@ Optional Packages:
    --without-openal        do not use OpenAL
    --without-opencl        do not use OpenCL
    --without-opengl        do not use OpenGL
@@ -26,7 +35,7 @@ index de03151..9248fa4 100755
    --without-osmesa        do not use the OSMesa library
    --without-oss           do not use the OSS sound support
    --without-pcap          do not use the Packet Capture library
-@@ -2109,6 +2112,7 @@ Optional Packages:
+@@ -2109,6 +2114,7 @@ Optional Packages:
    --without-v4l           do not use v4l1 (v4l support)
    --without-xcomposite    do not use the Xcomposite extension
    --without-xcursor       do not use the Xcursor extension
@@ -34,7 +43,7 @@ index de03151..9248fa4 100755
    --without-xinerama      do not use Xinerama (multi-monitor support)
    --without-xinput        do not use the Xinput extension
    --without-xinput2       do not use the Xinput 2 extension
-@@ -3321,6 +3325,12 @@ if test "${with_opengl+set}" = set; then :
+@@ -3321,6 +3327,12 @@ if test "${with_opengl+set}" = set; then :
  fi
  
  
@@ -47,7 +56,7 @@ index de03151..9248fa4 100755
  # Check whether --with-osmesa was given.
  if test "${with_osmesa+set}" = set; then :
    withval=$with_osmesa;
-@@ -3381,6 +3391,12 @@ if test "${with_xcursor+set}" = set; then :
+@@ -3381,6 +3393,12 @@ if test "${with_xcursor+set}" = set; then :
  fi
  
  
@@ -60,7 +69,7 @@ index de03151..9248fa4 100755
  # Check whether --with-xinerama was given.
  if test "${with_xinerama+set}" = set; then :
    withval=$with_xinerama; if test "x$withval" = "xno"; then ac_cv_header_X11_extensions_Xinerama_h=no; fi
-@@ -9433,6 +9449,7 @@ fi
+@@ -9433,6 +9451,7 @@ fi
                        X11/extensions/XInput2.h \
                        X11/extensions/XShm.h \
                        X11/extensions/Xcomposite.h \
@@ -68,7 +77,7 @@ index de03151..9248fa4 100755
                        X11/extensions/Xinerama.h \
                        X11/extensions/Xrandr.h \
                        X11/extensions/Xrender.h \
-@@ -10209,6 +10226,71 @@ This is an error since --with-xcomposite was requested." "$LINENO" 5 ;;
+@@ -10209,6 +10228,71 @@ This is an error since --with-xcomposite was requested." "$LINENO" 5 ;;
  esac
  fi
  
@@ -140,23 +149,40 @@ index de03151..9248fa4 100755
                  ac_fn_c_check_member "$LINENO" "XICCallback" "callback" "ac_cv_member_XICCallback_callback" "#ifdef HAVE_X11_XLIB_H
  #include <X11/Xlib.h>
  #endif
-@@ -10478,6 +10560,14 @@ This is an error since --with-opengl was requested." "$LINENO" 5 ;;
+@@ -10478,6 +10562,22 @@ This is an error since --with-opengl was requested." "$LINENO" 5 ;;
  esac
  fi
  
 +        if test "x$with_d3dadapter" != "xno"
 +    then
-+           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: XXX: Do we really need to check for the module?" >&5
-+$as_echo "$as_me: WARNING: XXX: Do we really need to check for the module?" >&2;}
-+           { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: XXX: use \`pkg-config --variable=moduledir d3d\` to get the module location" >&5
-+$as_echo "$as_me: WARNING: XXX: use \`pkg-config --variable=moduledir d3d\` to get the module location" >&2;}
++         D3D_CFLAGS=`pkg-config --cflags d3d`
++         D3D_LIBS=`pkg-config --libs d3d`
++
++
++
++$as_echo "#define SONAME_D3DADAPTER9 \"d3dadapter9.so.1\"" >>confdefs.h
++
++
++cat >>confdefs.h <<_ACEOF
++#define D3D_MODULE_DIR "`pkg-config --variable=moduledir d3d`"
++_ACEOF
++
 +    fi
 +
      CPPFLAGS="$ac_save_CPPFLAGS"
  else
      X_CFLAGS=""
+@@ -16668,6 +16768,8 @@ X_CFLAGS = $X_CFLAGS
+ X_PRE_LIBS = $X_PRE_LIBS
+ X_LIBS = $X_LIBS
+ X_EXTRA_LIBS = $X_EXTRA_LIBS
++D3D_CFLAGS = $D3D_CFLAGS
++D3D_LIBS = $D3D_LIBS
+ XML2_CFLAGS = $XML2_CFLAGS
+ XML2_LIBS = $XML2_LIBS
+ XSLT_CFLAGS = $XSLT_CFLAGS
 diff --git a/configure.ac b/configure.ac
-index 4ee8133..5496222 100644
+index 4ee8133..af56482 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -65,6 +65,7 @@ AC_ARG_WITH(openal,    AS_HELP_STRING([--without-openal],[do not use OpenAL]),
@@ -199,18 +225,19 @@ index 4ee8133..5496222 100644
          dnl *** Check for XICCallback struct
          AC_CHECK_MEMBERS([XICCallback.callback, XEvent.xcookie],,,
  [#ifdef HAVE_X11_XLIB_H
-@@ -1249,6 +1261,16 @@ This probably prevents linking to OpenGL. Try deleting the file and restarting c
+@@ -1249,6 +1261,17 @@ This probably prevents linking to OpenGL. Try deleting the file and restarting c
      WINE_WARNING_WITH(opengl,[test -n "$opengl_msg"],[$opengl_msg
  OpenGL and Direct3D won't be supported.])
  
-+    dnl Check for d3dadapter9
++    dnl Check for d3dadapter
 +    if test "x$with_d3dadapter" != "xno"
 +    then
-+           AC_MSG_WARN([XXX: Do we really need to check for the module?])
-+           AC_MSG_WARN([XXX: use `pkg-config --variable=moduledir d3d` to get the module location])
-+dnl        WINE_CHECK_SONAME(d3dadapter9,D3DAdapter9GetProc)
-+dnl        WINE_NOTICE_WITH(d3dadapter9,[test "x$ac_cv_lib_soname_d3dadapter9" = "x"],
-+dnl                         [libd3dadapter9 ${notice_platform}development files not found. Native Direct3D9 won't be supported.])
++         D3D_CFLAGS=`pkg-config --cflags d3d`
++         D3D_LIBS=`pkg-config --libs d3d`
++         AC_SUBST(D3D_CFLAGS)
++         AC_SUBST(D3D_LIBS)
++         AC_DEFINE(SONAME_D3DADAPTER9, ["d3dadapter9.so.1"], ["temporary hack"])
++         AC_DEFINE_UNQUOTED(D3D_MODULE_DIR, ["`pkg-config --variable=moduledir d3d`"], ["module dir"])
 +    fi
 +
      CPPFLAGS="$ac_save_CPPFLAGS"
@@ -362,10 +389,10 @@ index d12805f..cdc1f07 100644
  {
 diff --git a/dlls/d3d9/d3dadapter9.c b/dlls/d3d9/d3dadapter9.c
 new file mode 100644
-index 0000000..0c78f54
+index 0000000..68f318f
 --- /dev/null
 +++ b/dlls/d3d9/d3dadapter9.c
-@@ -0,0 +1,942 @@
+@@ -0,0 +1,937 @@
 +/*
 + * X11DRV IDirect3D9 interface using ID3DAdapter9
 + *
@@ -392,8 +419,7 @@ index 0000000..0c78f54
 +
 +#include <d3d9.h>
 +
-+// XXX: Hack alert
-+//#ifdef SONAME_LIBD3DADAPTER9
++#ifdef SONAME_D3DADAPTER9
 +
 +#include "wine/d3dadapter.h"
 +#include "wine/gdi_driver.h"
@@ -1280,13 +1306,11 @@ index 0000000..0c78f54
 +
 +    *ppOut = (IDirect3D9Ex *)This;
 +    FIXME("\033[1;32m\nNative Direct3D 9 is active."
-+          "\nFor more information visit https://wiki.ixit.cz/d3d9\n\033[0m");
++          "\nFor more information visit https://wiki.ixit.cz/d3d9\033[0m\n");
 +    return D3D_OK;
 +}
 +
-+// XXX: Hack alert
-+//#else
-+#if 0
++#else
 +
 +HRESULT
 +d3dadapter9_new( boolean ex,
@@ -1305,9 +1329,7 @@ index 0000000..0c78f54
 +{
 +}
 +
-+// XXX: Hack alert
-+//#endif /* SONAME_LIBD3DADAPTER9 */
-+#endif /* 0 */
++#endif /* SONAME_D3DADAPTER9 */
 diff --git a/dlls/dbghelp/dwarf.c b/dlls/dbghelp/dwarf.c
 index f1bd6cb..e1b16fc 100644
 --- a/dlls/dbghelp/dwarf.c
@@ -1558,10 +1580,10 @@ index 463eefd..41cced8 100644
  	ime.c \
 diff --git a/dlls/winex11.drv/d3dadapter.c b/dlls/winex11.drv/d3dadapter.c
 new file mode 100644
-index 0000000..957ea2a
+index 0000000..8834224
 --- /dev/null
 +++ b/dlls/winex11.drv/d3dadapter.c
-@@ -0,0 +1,963 @@
+@@ -0,0 +1,952 @@
 +/*
 + * X11DRV ID3DAdapter9 support functions
 + *
@@ -1590,12 +1612,9 @@ index 0000000..957ea2a
 +
 +WINE_DEFAULT_DEBUG_CHANNEL(d3dadapter);
 +
-+// XXX: Hack alert
-+//#if defined(SONAME_LIBXEXT) && \
-+//    defined(SONAME_LIBXFIXES) && \
-+//    defined(SONAME_LIBD3DADAPTER9)
-+#define SONAME_LIBD3DADAPTER9 "d3dadapter9.so.1"
-+// XXX: ^^ is still a hack
++#if defined(SONAME_LIBXEXT) && \
++    defined(SONAME_LIBXFIXES) && \
++    defined(SONAME_D3DADAPTER9)
 +
 +#include "wine/d3dadapter.h"
 +#include "wine/library.h"
@@ -2408,27 +2427,23 @@ index 0000000..957ea2a
 +
 +    /*  */
 +    if (!usexfixes) {
-+        ERR("%s needs Xfixes.\n", SONAME_LIBD3DADAPTER9);
++        ERR("%s needs Xfixes.\n", SONAME_D3DADAPTER9);
 +        return FALSE;
 +    }
 +
-+// XXX: Hack alert
-+// TODO: Set a define for the module path, which is set in configure.ac by
-+// the value of pkg-config --variable=moduledir d3d
-+//    handle = wine_dlopen(SONAME_LIBD3DADAPTER9, RTLD_GLOBAL|RTLD_NOW,
-+    handle = wine_dlopen("/usr/lib32/d3d/" SONAME_LIBD3DADAPTER9, RTLD_GLOBAL|RTLD_NOW,
-+                         errbuf, sizeof(errbuf));
++    handle = wine_dlopen(D3D_MODULE_DIR "/" SONAME_D3DADAPTER9,
++                         RTLD_GLOBAL | RTLD_NOW, errbuf, sizeof(errbuf));
 +    if (!handle) {
-+        ERR("Failed to load %s: %s\n", SONAME_LIBD3DADAPTER9, errbuf);
++        ERR("Failed to load %s: %s\n", SONAME_D3DADAPTER9, errbuf);
 +        goto cleanup;
 +    }
 +
-+    /* find our entry point in libd3dadapter9 */
++    /* find our entry point in d3dadapter9 */
 +    pD3DAdapter9GetProc = wine_dlsym(handle, "D3DAdapter9GetProc",
 +                                     errbuf, sizeof(errbuf));
 +    if (!pD3DAdapter9GetProc) {
 +        ERR("Failed to get the entry point from %s: %s",
-+            SONAME_LIBD3DADAPTER9, errbuf);
++            SONAME_D3DADAPTER9, errbuf);
 +        goto cleanup;
 +    }
 +
@@ -2436,14 +2451,14 @@ index 0000000..957ea2a
 +    d3d9_drm = pD3DAdapter9GetProc(D3DADAPTER9DRM_NAME);
 +    if (!d3d9_drm) {
 +        ERR("%s doesn't support the `%s' backend.\n",
-+            SONAME_LIBD3DADAPTER9, D3DADAPTER9DRM_NAME);
++            SONAME_D3DADAPTER9, D3DADAPTER9DRM_NAME);
 +        goto cleanup;
 +    }
 +
 +    /* verify that we're binary compatible */
 +    if (d3d9_drm->major_version != D3DADAPTER9DRM_MAJOR) {
 +        ERR("Version mismatch. %s has %d.%d, was expecting %d.x\n",
-+            SONAME_LIBD3DADAPTER9, d3d9_drm->major_version,
++            SONAME_D3DADAPTER9, d3d9_drm->major_version,
 +            d3d9_drm->minor_version, D3DADAPTER9DRM_MAJOR);
 +        goto cleanup;
 +    }
@@ -2467,7 +2482,7 @@ index 0000000..957ea2a
 +
 +cleanup:
 +    ERR("\033[1;31m\nNative Direct3D 9 will be unavailable."
-+        "\nFor more information visit https://wiki.ixit.cz/d3d9\n\033[0m");
++        "\nFor more information visit https://wiki.ixit.cz/d3d9\033[0m\n");
 +    if (handle) {
 +        wine_dlclose(handle, NULL, 0);
 +        handle = NULL;
@@ -2493,11 +2508,9 @@ index 0000000..957ea2a
 +    return NULL;
 +}
 +
-+// XXX: Hack alert
-+//#else /* defined(SONAME_LIBXEXT) && \
-+//         defined(SONAME_LIBXFIXES) && \
-+//         defined(SONAME_LIBD3DADAPTER9) */
-+#if 0
++#else /* defined(SONAME_LIBXEXT) && \
++         defined(SONAME_LIBXFIXES) && \
++         defined(SONAME_D3DADAPTER9) */
 +
 +struct d3dadapter_funcs;
 +
@@ -2510,7 +2523,7 @@ index 0000000..957ea2a
 +has_d3dadapter( void )
 +{
 +    FIXME("\033[0;31m\nWine source code has been compiled without native Direct3D 9 support."
-+          "\nFor more information visit https://wiki.ixit.cz/d3d9\n\033[0m");
++          "a\nFor more information visit https://wiki.ixit.cz/d3d9\033[0m\n");
 +    return FALSE;
 +}
 +
@@ -2520,11 +2533,9 @@ index 0000000..957ea2a
 +    return NULL;
 +}
 +
-+// XXX: Hack alert
-+//#endif /* defined(SONAME_LIBXEXT) && \
-+//          defined(SONAME_LIBXFIXES) && \
-+//          defined(SONAME_LIBD3DADAPTER9) */
-+#endif
++#endif /* defined(SONAME_LIBXEXT) && \
++          defined(SONAME_LIBXFIXES) && \
++          defined(SONAME_D3DADAPTER9) */
 diff --git a/dlls/winex11.drv/dri3.c b/dlls/winex11.drv/dri3.c
 new file mode 100644
 index 0000000..e3936d3
@@ -3650,7 +3661,7 @@ index a58c0b5..b9237bf 100644
  
 diff --git a/include/wine/d3dadapter.h b/include/wine/d3dadapter.h
 new file mode 100644
-index 0000000..126dd58
+index 0000000..6f90338
 --- /dev/null
 +++ b/include/wine/d3dadapter.h
 @@ -0,0 +1,42 @@
@@ -3681,7 +3692,7 @@ index 0000000..126dd58
 +# error You must include config.h to use this header
 +#endif
 +
-+//#ifdef SONAME_LIBD3DADAPTER9
++#ifdef SONAME_D3DADAPTER9
 +
 +#include <d3dadapter/d3dadapter9.h>
 +
@@ -3693,7 +3704,7 @@ index 0000000..126dd58
 +    HRESULT (*create_adapter9)(HDC hdc, ID3DAdapter9 **adapter);
 +};
 +
-+//#endif /* SONAME_LIBD3DADAPTER9 */
++#endif /* SONAME_D3DADAPTER9 */
 +
 +#endif /* __WINE_D3DADAPTER_H */
 diff --git a/include/wine/gdi_driver.h b/include/wine/gdi_driver.h

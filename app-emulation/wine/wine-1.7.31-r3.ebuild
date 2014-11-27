@@ -232,7 +232,7 @@ COMMON_DEPEND="
 				>=x11-libs/libXcomposite-0.4.4-r1[abi_x86_32(-)]
 			) )
 			d3dadapter? ( || (
-				>=media-libs/mesa-10.4[abi_x86_32(-)]
+				>=media-libs/mesa-10.4[d3d9,abi_x86_32(-)]
 				|| (
 					app-emulation/emul-linux-x86-xlibs[development,-abi_x86_32(-)]
 					x11-libs/libXfixes[abi_x86_32(-)]
