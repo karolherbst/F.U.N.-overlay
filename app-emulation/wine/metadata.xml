@@ -9,6 +9,7 @@ Think of Wine as a compatibility layer for running Windows programs. Wine does n
 </longdescription> 
 <use>
 	<flag name='capi'>Enable ISDN support via CAPI</flag>
+	<flag name='cs'>Enable command stream patches</flag>
 	<flag name='custom-cflags'>Bypass strip-flags; use at your own peril</flag>
 	<flag name='dos'>Pull in <pkg>games-emulation/dosbox</pkg> to run DOS applications</flag>
 	<flag name='gecko'>Add support for the Gecko engine when using iexplore</flag>
