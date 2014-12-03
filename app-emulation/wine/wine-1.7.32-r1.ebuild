@@ -23,7 +23,7 @@ else
 fi
 
 GV="2.34"
-MV="4.5.2"
+MV="4.5.4"
 COMPHOLIO_P="wine-staging-${PV}"
 WINE_GENTOO="wine-gentoo-2013.06.24"
 DESCRIPTION="Free implementation of Windows(tm) on Unix"
@@ -324,10 +324,10 @@ src_prepare() {
 		"${FILESDIR}"/${PN}-ToUnicodeEx-dead-key.patch
 	)
 	if use cs; then
-		PATCHES+=( "${FILESDIR}"/${P}-cs.patch )
+		PATCHES+=( "${FILESDIR}"/${PN}-1.7.31-cs.patch )
 	fi
 	if use d3dadapter; then
-		PATCHES+=( "${FILESDIR}"/${P}-d3d9adapter.patch )
+		PATCHES+=( "${FILESDIR}"/${PN}-1.7.31-d3d9adapter.patch )
 	fi
 	local COMPHOLIO_MAKE_ARGS="-W fonts-Missing_Fonts.ok"
 

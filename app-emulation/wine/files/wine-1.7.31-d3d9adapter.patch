@@ -1580,10 +1580,10 @@ index 463eefd..41cced8 100644
  	ime.c \
 diff --git a/dlls/winex11.drv/d3dadapter.c b/dlls/winex11.drv/d3dadapter.c
 new file mode 100644
-index 0000000..8834224
+index 0000000..7030adb
 --- /dev/null
 +++ b/dlls/winex11.drv/d3dadapter.c
-@@ -0,0 +1,952 @@
+@@ -0,0 +1,954 @@
 +/*
 + * X11DRV ID3DAdapter9 support functions
 + *
@@ -2299,8 +2299,10 @@ index 0000000..8834224
 +                                          D3DPRESENT_PARAMETERS *pPresentationParameters,
 +                                          ID3DPresent **ppPresent )
 +{
-+    FIXME("(%p, %p, %p), stub!\n", This, pPresentationParameters, ppPresent);
-+    return D3DERR_INVALIDCALL;
++    HRESULT hr;
++    hr = DRI3Present_new(gdi_display, This->present_backends[0]->devname,
++                         pPresentationParameters, 0, (struct DRI3Present **)ppPresent);
++    return hr;
 +}
 +
 +static void WINAPI
@@ -3636,10 +3638,20 @@ index d2a1c45..e630b82 100644
  };
  
 diff --git a/include/config.h.in b/include/config.h.in
-index a58c0b5..b9237bf 100644
+index a58c0b5..f9820e3 100644
 --- a/include/config.h.in
 +++ b/include/config.h.in
-@@ -1113,6 +1113,9 @@
+@@ -4,6 +4,9 @@
+ #define __WINE_CONFIG_H
+ #ifndef WINE_CROSSTEST
+ 
++/* "module dir" */
++#undef D3D_MODULE_DIR
++
+ /* Define to a function attribute for Microsoft hotpatch assembly prefix. */
+ #undef DECLSPEC_HOTPATCH
+ 
+@@ -1113,6 +1116,9 @@
  /* Define to 1 if you have the <X11/extensions/xf86vmproto.h> header file. */
  #undef HAVE_X11_EXTENSIONS_XF86VMPROTO_H
  
@@ -3649,7 +3661,17 @@ index a58c0b5..b9237bf 100644
  /* Define to 1 if you have the <X11/extensions/Xinerama.h> header file. */
  #undef HAVE_X11_EXTENSIONS_XINERAMA_H
  
-@@ -1317,6 +1320,9 @@
+@@ -1245,6 +1251,9 @@
+ /* Define to the version of this package. */
+ #undef PACKAGE_VERSION
+ 
++/* "temporary hack" */
++#undef SONAME_D3DADAPTER9
++
+ /* Define to the soname of the libcapi20 library. */
+ #undef SONAME_LIBCAPI20
+ 
+@@ -1317,6 +1326,9 @@
  /* Define to the soname of the libXext library. */
  #undef SONAME_LIBXEXT
  
