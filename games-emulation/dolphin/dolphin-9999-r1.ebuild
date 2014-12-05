@@ -27,7 +27,7 @@ IUSE="alsa ao bluetooth doc ffmpeg +lzo openal opengl openmp portaudio pulseaudi
 
 RDEPEND=">=media-libs/glew-1.10
 	media-libs/libsdl2[joystick,haptic]
-	<media-libs/libsfml-2.0
+	>media-libs/libsfml-2.1
 	>=net-libs/miniupnpc-1.8
 	sys-libs/readline
 	x11-libs/libXext
@@ -92,17 +92,14 @@ src_prepare() {
 	# - SOIL: The sources are not public.
 	# - Bochs-disasm: Don't know what it is.
 	# - GL: A custom gl.h file is used.
-	# - polarssl: Not fully supported yet.
 	# - gtest: No idea. Removal causes build failure.
 	mv Externals/SOIL . || die
 	mv Externals/Bochs_disasm . || die
-	mv Externals/polarssl . || die
 	mv Externals/GL . || die
 	mv Externals/gtest . || die
 	rm -r Externals/* || die "Failed to delete Externals dir."
 	mv Bochs_disasm Externals || die
 	mv SOIL Externals || die
-	mv polarssl Externals || die
 	mv GL Externals || die
 	mv gtest Externals || die
 }
