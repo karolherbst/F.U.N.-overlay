@@ -27,7 +27,7 @@ IUSE="alsa ao bluetooth doc ffmpeg +lzo openal opengl openmp portaudio pulseaudi
 
 RDEPEND=">=media-libs/glew-1.10
 	media-libs/libsdl2[joystick,haptic]
-	>media-libs/libsfml-2.1
+	>=media-libs/libsfml-2.1
 	>=net-libs/miniupnpc-1.8
 	sys-libs/readline
 	x11-libs/libXext
