@@ -327,7 +327,7 @@ src_prepare() {
 		PATCHES+=( "${FILESDIR}"/${PN}-1.7.31-cs.patch )
 	fi
 	if use d3dadapter; then
-		PATCHES+=( "${FILESDIR}"/${PN}-1.7.31-d3d9adapter.patch )
+		PATCHES+=( "${FILESDIR}"/${PN}-1.7.32-d3d9adapter.patch )
 	fi
 	local COMPHOLIO_MAKE_ARGS="-W fonts-Missing_Fonts.ok"
 
