@@ -8,7 +8,7 @@ inherit linux-mod
 
 DESCRIPTION="A driver for the Clevo P150EM/P170EM/P150SM/P157SM/P170SM/P177SM backlight keyboard"
 HOMEPAGE="http://www.linux-onlineshop.de/forum/index.php?page=Thread&threadID=26"
-SRC_URI="http://www.linux-onlineshop.de/forum/index.php?page=Attachment&attachmentID=76&h=e1c3a51c297ded51bbddfac915ec65a050f576ca&s=b82ceafa7a0be87d9192dfd7c617261f027cde27 -> ${P}.tar.gz"
+SRC_URI="http://www.linux-onlineshop.de/forum/index.php?page=Attachment&attachmentID=262&h=98b12b8ddff00c49706504583dbaf5edb1ec3980&s=f3ceb43cbfbaa1d5f9906a395a1d425bb4d69135 -> ${P}.tar.gz"
 
 SLOT="0"
 LICENSE="GPL-2"
