@@ -40,7 +40,7 @@ SRC_URI="${SRC_URI}
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cs cups custom-cflags d3dadapter dos elibc_glibc +fontconfig +gecko gphoto2 gsm gstreamer +jpeg lcms ldap +mono mp3 ncurses netapi nls odbc openal opencl +opengl osmesa oss +perl pipelight +png +prelink pulseaudio +realtime +run-exes samba scanner selinux +ssl test +threads +truetype +udisks v4l +X xcomposite xinerama +xml"
+IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cups custom-cflags d3dadapter dos elibc_glibc +fontconfig +gecko gphoto2 gsm gstreamer +jpeg lcms ldap +mono mp3 ncurses netapi nls odbc openal opencl +opengl osmesa oss +perl pipelight +png +prelink pulseaudio +realtime +run-exes samba scanner selinux +ssl test +threads +truetype +udisks v4l +X xcomposite xinerama +xml"
 REQUIRED_USE="|| ( abi_x86_32 abi_x86_64 )
 	test? ( abi_x86_32 )
 	elibc_glibc? ( threads )
@@ -323,11 +323,8 @@ src_prepare() {
 		"${FILESDIR}"/4-XInputGetState.patch
 		"${FILESDIR}"/${PN}-ToUnicodeEx-dead-key.patch
 	)
-	if use cs; then
-		PATCHES+=( "${FILESDIR}"/${PN}-1.7.31-cs.patch )
-	fi
 	if use d3dadapter; then
-		PATCHES+=( "${FILESDIR}"/${PN}-1.7.32-d3d9adapter.patch )
+		PATCHES+=( "${FILESDIR}"/${PN}-1.7.33-d3d9adapter.patch )
 	fi
 	local COMPHOLIO_MAKE_ARGS="-W fonts-Missing_Fonts.ok"
 
@@ -510,10 +507,6 @@ pkg_preinst() {
 }
 
 pkg_postinst() {
-	if use cs; then
-		ewarn "Command Stream MT runtime has to be enabled in regedit seperatly: HKCU/Software/Wine/Direct3D/CSMT=enabled"
-	fi
-
 	gnome2_icon_cache_update
 	fdo-mime_desktop_database_update
 }
