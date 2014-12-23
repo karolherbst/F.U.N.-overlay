@@ -420,12 +420,15 @@ multilib_src_configure() {
 		$(use_with xinerama)
 		$(use_with xml)
 		$(use_with xml xslt)
-		$(use_with d3dadapter)
-		$(use_with d3dadapter xfixes)
 	)
 
 	use pulseaudio && myconf+=( --with-pulse )
 	use pipelight && myconf+=( --with-xattr )
+	use d3dadapter && myconf+=(
+		--with-d3dadapter
+		--with-xfixes
+		--with-d3dadapter_dri2_fallback
+	)
 
 	local PKG_CONFIG AR RANLIB
 	# Avoid crossdev's i686-pc-linux-gnu-pkg-config if building wine32 on amd64; #472038
