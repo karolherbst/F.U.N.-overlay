@@ -427,7 +427,7 @@ multilib_src_configure() {
 	use d3dadapter && myconf+=(
 		--with-d3dadapter
 		--with-xfixes
-		--with-d3dadapter_dri2_fallback
+		--without-d3dadapter_dri2_fallback
 	)
 
 	local PKG_CONFIG AR RANLIB
