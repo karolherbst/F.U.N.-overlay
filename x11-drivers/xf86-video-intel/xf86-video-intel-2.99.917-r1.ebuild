@@ -1,6 +1,6 @@
 # Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/x11-drivers/xf86-video-intel/xf86-video-intel-2.99.916.ebuild,v 1.1 2014/09/08 20:57:01 remi Exp $
+# $Header: /var/cvsroot/gentoo-x86/x11-drivers/xf86-video-intel/xf86-video-intel-2.99.917.ebuild,v 1.1 2014/12/27 09:12:46 remi Exp $
 
 EAPI=5
 
@@ -14,17 +14,12 @@ IUSE="debug glamor +sna +udev uxa xvmc dri3"
 
 REQUIRED_USE="
 	|| ( sna uxa )
-	glamor? ( uxa )
 "
 
 RDEPEND="x11-libs/libXext
 	x11-libs/libXfixes
 	>=x11-libs/pixman-0.27.1
 	>=x11-libs/libdrm-2.4.29[video_cards_intel]
-	glamor? ( || (
-		x11-base/xorg-server[glamor]
-		>=x11-libs/glamor-0.6.0
-	) )
 	sna? (
 		>=x11-base/xorg-server-1.10
 	)
@@ -47,7 +42,6 @@ src_configure() {
 	XORG_CONFIGURE_OPTIONS=(
 		$(use_enable debug)
 		$(use_enable dri)
-		$(use_enable glamor)
 		$(use_enable sna)
 		$(use_enable uxa)
 		$(use_enable udev)
