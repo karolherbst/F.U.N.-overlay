@@ -102,6 +102,8 @@ src_prepare() {
 	mv SOIL Externals || die
 	mv GL Externals || die
 	mv gtest Externals || die
+
+	epatch_user
 }
 
 src_configure() {
