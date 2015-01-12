@@ -1,6 +1,6 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.7.29.ebuild,v 1.1 2014/10/25 20:37:44 ryao Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.7.33.ebuild,v 1.1 2015/01/01 21:01:23 ryao Exp $
 
 EAPI="5"
 
@@ -40,7 +40,7 @@ SRC_URI="${SRC_URI}
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cups custom-cflags d3dadapter dos elibc_glibc +fontconfig +gecko gphoto2 gsm gstreamer +jpeg lcms ldap +mono mp3 ncurses netapi nls odbc openal opencl +opengl osmesa oss +perl pipelight +png +prelink pulseaudio +realtime +run-exes samba scanner selinux +ssl test +threads +truetype +udisks v4l +X xcomposite xinerama +xml"
+IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cups custom-cflags d3dadapter dos elibc_glibc +fontconfig +gecko gphoto2 gsm gstreamer +jpeg lcms ldap +mono mp3 ncurses netapi nls odbc openal opencl +opengl osmesa oss +perl pcap pipelight +png +prelink pulseaudio +realtime +run-exes samba scanner selinux +ssl test +threads +truetype +udisks v4l +X xcomposite xinerama +xml"
 REQUIRED_USE="|| ( abi_x86_32 abi_x86_64 )
 	test? ( abi_x86_32 )
 	elibc_glibc? ( threads )
@@ -84,6 +84,7 @@ NATIVE_DEPEND="
 	nls? ( sys-devel/gettext )
 	odbc? ( dev-db/unixODBC:= )
 	osmesa? ( media-libs/mesa[osmesa] )
+	pcap? ( net-libs/libpcap )
 	pipelight? ( sys-apps/attr )
 	pulseaudio? ( media-sound/pulseaudio )
 	xml? ( dev-libs/libxml2 dev-libs/libxslt )
@@ -196,6 +197,7 @@ COMMON_DEPEND="
 				>=app-emulation/emul-linux-x86-opengl-20121028[development,-abi_x86_32(-)]
 				>=media-libs/mesa-9.1.6[osmesa,abi_x86_32(-)]
 			) )
+			pcap? ( net-libs/libpcap[abi_x86_32(-)] )
 			pipelight? ( || (
 				app-emulation/emul-linux-x86-baselibs[development,-abi_x86_32(-)]
 				>=sys-apps/attr-2.4.47-r1[abi_x86_32(-)]
@@ -342,20 +344,11 @@ src_prepare() {
 		ewarn "to Wine bugzilla unless you can reproduce them with USE=-pipelight"
 
 		# epatch doesn't support binary patches and we ship our own pulse patches
-		emake -C "${WORKDIR}/${COMPHOLIO_P}/patches" \
-			$(echo ${COMPHOLIO_MAKE_ARGS}) \
-		    series
+		pushd "${WORKDIR}/${COMPHOLIO_P}"
+		epatch "${FILESDIR}"/${PN}-staging-no-autoreconf.patch
+		popd
+		"${WORKDIR}/${COMPHOLIO_P}/patches/patchinstall.sh" DESTDIR="${S}" --all
 
-		PATCHES+=( $(sed -e "s:^:${WORKDIR}/${COMPHOLIO_P}/patches/:" \
-		    "${WORKDIR}/${COMPHOLIO_P}/patches/series") )
-
-		# epatch doesn't support binary patches
-		ebegin "Applying Compholio font patches"
-		for f in "${WORKDIR}/${COMPHOLIO_P}/patches/fonts-Missing_Fonts"/*.patch; do
-			"../${COMPHOLIO_P}/debian/tools/gitapply.sh" < "${f}" \
-			    || die "Failed to apply ${f}"
-		done
-		eend
 	elif use pulseaudio; then
 		PATCHES+=( "../${COMPHOLIO_P}/patches/winepulse-PulseAudio_Support"/*.patch )
 	fi
@@ -408,7 +401,7 @@ multilib_src_configure() {
 		$(use_with opengl)
 		$(use_with osmesa)
 		$(use_with oss)
-		--without-pcap
+		$(use_with pcap)
 		$(use_with png)
 		$(use_with threads pthread)
 		$(use_with scanner sane)

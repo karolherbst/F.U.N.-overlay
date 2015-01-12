@@ -1813,10 +1813,10 @@ index 463eefd..65d32ed 100644
  	ime.c \
 diff --git a/dlls/winex11.drv/d3dadapter.c b/dlls/winex11.drv/d3dadapter.c
 new file mode 100644
-index 0000000..c2355a5
+index 0000000..994b453
 --- /dev/null
 +++ b/dlls/winex11.drv/d3dadapter.c
-@@ -0,0 +1,1000 @@
+@@ -0,0 +1,1002 @@
 +/*
 + * X11DRV ID3DAdapter9 support functions
 + *
@@ -2038,7 +2038,8 @@ index 0000000..c2355a5
 +        ChangeDisplaySettingsExW(This->devname, &(This->initial_mode), 0, CDS_FULLSCREEN, NULL);
 +        PRESENTDestroy(gdi_display, This->present_priv);
 +#ifdef D3DADAPTER9_DRI2
-+        DRI2FallbackDestroy(This->dri2_priv);
++        if (is_dri2_fallback)
++            DRI2FallbackDestroy(This->dri2_priv);
 +#endif
 +        HeapFree(GetProcessHeap(), 0, This);
 +    }
@@ -2466,7 +2467,8 @@ index 0000000..c2355a5
 +
 +    PRESENTInit(dpy, &(This->present_priv));
 +#ifdef D3DADAPTER9_DRI2
-+    DRI2FallbackInit(dpy, &(This->dri2_priv));
++    if (is_dri2_fallback)
++        DRI2FallbackInit(dpy, &(This->dri2_priv));
 +#endif
 +    *out = This;
 +
@@ -2819,10 +2821,10 @@ index 0000000..c2355a5
 +          defined(SONAME_D3DADAPTER9) */
 diff --git a/dlls/winex11.drv/dri3.c b/dlls/winex11.drv/dri3.c
 new file mode 100644
-index 0000000..e2f20b0
+index 0000000..db41ac3
 --- /dev/null
 +++ b/dlls/winex11.drv/dri3.c
-@@ -0,0 +1,1319 @@
+@@ -0,0 +1,1326 @@
 +/*
 + * Wine X11DRV DRI3 interface
 + *
@@ -2914,6 +2916,7 @@ index 0000000..e2f20b0
 +    xcb_dri3_query_version_reply_t *dri3_reply;
 +    xcb_generic_error_t *error;
 +    const xcb_query_extension_reply_t *extension;
++    int fd;
 +
 +    xcb_prefetch_extension_data(xcb_connection, &xcb_dri3_id);
 +
@@ -2931,6 +2934,12 @@ index 0000000..e2f20b0
 +        ERR("Issue getting requested version of DRI3: %d,%d\n", major, minor);
 +        return FALSE;
 +    }
++
++    if (!DRI3Open(dpy, DefaultScreen(dpy), &fd)) {
++        ERR("DRI3 advertised, but not working\n");
++        return FALSE;
++    }
++    close(fd);
 +
 +    TRACE("DRI3 version %d,%d found. %d %d requested\n", major, minor, (int)dri3_reply->major_version, (int)dri3_reply->minor_version);
 +    free(dri3_reply);
