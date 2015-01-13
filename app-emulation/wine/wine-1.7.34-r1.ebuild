@@ -319,12 +319,17 @@ src_prepare() {
 		"${FILESDIR}"/${PN}-1.4_rc2-multilib-portage.patch #395615
 		"${FILESDIR}"/${PN}-1.7.12-osmesa-check.patch #429386
 		"${FILESDIR}"/${PN}-1.6-memset-O3.patch #480508
-		"${FILESDIR}"/1-XInputGetState.patch
-		"${FILESDIR}"/2-XInputGetState.patch
-		"${FILESDIR}"/3-XInputGetState.patch
-		"${FILESDIR}"/4-XInputGetState.patch
+#		"${FILESDIR}"/1-XInputGetState.patch disabled, because of huge CPU usage
+#		"${FILESDIR}"/2-XInputGetState.patch
+#		"${FILESDIR}"/3-XInputGetState.patch
+#		"${FILESDIR}"/4-XInputGetState.patch
 		"${FILESDIR}"/${PN}-ToUnicodeEx-dead-key.patch
 	)
+	if use pipelight; then
+		PATCHES+=( "${FILESDIR}"/${PN}-1.7.34-pipelight-win64-corruption-wine-staging-270.patch )
+	else
+		PATCHES+=( "${FILESDIR}"/${PN}-1.7.34-win64-corruption-wine-staging-270.patch )
+	fi
 	if use d3dadapter; then
 		PATCHES+=( "${FILESDIR}"/${PN}-1.7.33-d3d9adapter.patch )
 	fi
