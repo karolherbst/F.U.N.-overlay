@@ -11,7 +11,7 @@ if [[ ${PV} = 9999* ]]; then
 	EXPERIMENTAL="true"
 fi
 
-PYTHON_COMPAT=( python{2_6,2_7} )
+PYTHON_COMPAT=( python2_7 )
 
 inherit base autotools multilib multilib-minimal flag-o-matic \
 	python-any-r1 toolchain-funcs pax-utils ${GIT_ECLASS}
@@ -151,6 +151,9 @@ done
 
 DEPEND="${RDEPEND}
 	${PYTHON_DEPS}
+	$(python_gen_any_dep '
+		dev-python/mako[${PYTHON_USEDEP}]
+	')
 	llvm? (
 		r600-llvm-compiler? ( sys-devel/llvm[video_cards_radeon] )
 		video_cards_radeonsi? ( sys-devel/llvm[video_cards_radeon] )
@@ -184,6 +187,10 @@ QA_EXECSTACK="usr/lib*/libGL.so*"
 QA_WX_LOAD="usr/lib*/libGL.so*"
 
 # Think about: ggi, fbcon, no-X configs
+
+python_check_deps() {
+	has_version "dev-python/mako[${PYTHON_USEDEP}]"
+}
 
 pkg_setup() {
 	# workaround toc-issue wrt #386545
