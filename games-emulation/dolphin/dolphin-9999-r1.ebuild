@@ -97,11 +97,13 @@ src_prepare() {
 	mv Externals/Bochs_disasm . || die
 	mv Externals/GL . || die
 	mv Externals/gtest . || die
+	mv Externals/xxhash . || die
 	rm -r Externals/* || die "Failed to delete Externals dir."
 	mv Bochs_disasm Externals || die
 	mv SOIL Externals || die
 	mv GL Externals || die
 	mv gtest Externals || die
+	mv xxhash Externals || die
 
 	epatch_user
 }
