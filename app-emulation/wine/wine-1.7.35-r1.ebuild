@@ -325,11 +325,6 @@ src_prepare() {
 #		"${FILESDIR}"/4-XInputGetState.patch
 		"${FILESDIR}"/${PN}-ToUnicodeEx-dead-key.patch
 	)
-	if use pipelight; then
-		PATCHES+=( "${FILESDIR}"/${PN}-1.7.34-pipelight-win64-corruption-wine-staging-270.patch )
-	else
-		PATCHES+=( "${FILESDIR}"/${PN}-1.7.34-win64-corruption-wine-staging-270.patch )
-	fi
 	if use d3dadapter; then
 		PATCHES+=( "${FILESDIR}"/${PN}-1.7.33-d3d9adapter.patch )
 	fi
@@ -348,14 +343,13 @@ src_prepare() {
 		ewarn "which is unsupported by Wine developers. Please don't report bugs"
 		ewarn "to Wine bugzilla unless you can reproduce them with USE=-pipelight"
 
-		# epatch doesn't support binary patches and we ship our own pulse patches
-		pushd "${WORKDIR}/${COMPHOLIO_P}"
-		epatch "${FILESDIR}"/${PN}-staging-no-autoreconf.patch
-		popd
-		"${WORKDIR}/${COMPHOLIO_P}/patches/patchinstall.sh" DESTDIR="${S}" --all
-
-	elif use pulseaudio; then
-		PATCHES+=( "../${COMPHOLIO_P}/patches/winepulse-PulseAudio_Support"/*.patch )
+		"${WORKDIR}/${COMPHOLIO_P}/patches/patchinstall.sh" DESTDIR="${S}" --all --no-autoconf
+		PATCHES+=( "${FILESDIR}"/${PN}-1.7.34-pipelight-win64-corruption-wine-staging-270.patch )
+	else
+		PATCHES+=( "${FILESDIR}"/${PN}-1.7.34-win64-corruption-wine-staging-270.patch )
+		if use pulseaudio; then
+			PATCHES+=( "../${COMPHOLIO_P}/patches/winepulse-PulseAudio_Support"/*.patch )
+		fi
 	fi
 	autotools-utils_src_prepare
 
