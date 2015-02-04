@@ -1,6 +1,6 @@
-# Copyright 1999-2010 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/games-emulation/desmume/desmume-0.9.5.ebuild,v 1.3 2010/03/04 00:43:55 nyhm Exp $
+# $Header: $
 
 EAPI="3"
 
@@ -16,43 +16,38 @@ SLOT="0"
 KEYWORDS=""
 IUSE="openal gtk glade osmesa nls wifi"
 
-DEPEND="virtual/opengl
-	|| (
-		dev-vcs/subversion[webdav-neon]
-		dev-vcs/subversion[http]
-	)
-	sys-libs/zlib
-	dev-libs/zziplib
-	media-libs/libsdl[joystick]
-	x11-libs/agg
-	nls? ( virtual/libintl
-		sys-devel/gettext )
-	openal? ( media-libs/openal )
-	gtk? ( >=x11-libs/gtk+-2.8.0
-		x11-libs/gtkglext )
-	glade? ( gnome-base/libglade
-		x11-libs/gtkglext )
-	osmesa? ( media-libs/mesa[osmesa] )
-	wifi? ( net-libs/libpcap )"
 RDEPEND="virtual/opengl
 	sys-libs/zlib
 	dev-libs/zziplib
 	media-libs/libsdl[joystick]
 	x11-libs/agg
-	nls? ( virtual/libintl
-		sys-devel/gettext )
+	nls? (
+		virtual/libintl
+		sys-devel/gettext
+	)
 	openal? ( media-libs/openal )
-	gtk? ( >=x11-libs/gtk+-2.8.0
-		x11-libs/gtkglext )
-	glade? ( gnome-base/libglade
-		x11-libs/gtkglext )
+	gtk? (
+		>=x11-libs/gtk+-2.8.0
+		x11-libs/gtkglext
+	)
+	glade? (
+		gnome-base/libglade
+		x11-libs/gtkglext
+	)
 	osmesa? ( media-libs/mesa[osmesa] )
-	wifi? ( net-libs/libpcap )"
+	wifi? ( net-libs/libpcap )
+"
+DEPEND="${RDEPEND}
+	|| (
+		dev-vcs/subversion[webdav-neon]
+		dev-vcs/subversion[http]
+	)
+"
 
 src_prepare() {
 	use wifi && \
 		eerror "wifi support is broken and may not work"
-	
+
 	if ! use gtk && $(use glade); then
 		einfo "glade support was requested but not gtk"
 		einfo "glade(libglade) depends on gtk"
@@ -60,10 +55,6 @@ src_prepare() {
 	fi
 
 	eautoreconf
-
-	[ -e "${S}/po/Makefile.in.in" ] && \
-		eerror "apparently missing file issue has been fixed. please, remove this crutch" || \
-		cp -v "${FILESDIR}/Makefile.in.in" "${S}"/po/
 }
 
 src_configure() {
