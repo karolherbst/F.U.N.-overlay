@@ -1,5 +1,9 @@
-Add the following xml code as a file in /etc/layman/overlays :
---------------------------------------------------------------
+Add the following xml code as a file in /etc/layman/overlays.
+
+Please make sure to have a line like
+  overlay_defs : /etc/layman/overlays
+inside your layman.cfg
+-------------------------------------------------------------
 
 <?xml version="1.0" ?>
 <repositories version="1.0">
