@@ -1,6 +1,6 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/games-emulation/dolphin/dolphin-9999.ebuild,v 1.14 2014/09/20 23:50:52 twitch153 Exp $
+# $Header: /var/cvsroot/gentoo-x86/games-emulation/dolphin/dolphin-9999.ebuild,v 1.21 2015/02/09 00:00:07 twitch153 Exp $
 
 EAPI=5
 
@@ -26,12 +26,13 @@ SLOT="0"
 IUSE="alsa ao bluetooth doc ffmpeg +lzo openal opengl openmp portaudio pulseaudio"
 
 RDEPEND=">=media-libs/glew-1.10
-	media-libs/libsdl2[joystick,haptic]
 	>=media-libs/libsfml-2.1
 	>=net-libs/miniupnpc-1.8
-	sys-libs/readline
+	sys-libs/readline:=
 	x11-libs/libXext
 	x11-libs/libXrandr
+	media-libs/libsdl2[haptic,joystick]
+	net-libs/polarssl[havege]
 	alsa? ( media-libs/alsa-lib )
 	ao? ( media-libs/libao )
 	bluetooth? ( net-wireless/bluez )
@@ -41,7 +42,6 @@ RDEPEND=">=media-libs/glew-1.10
 	opengl? ( virtual/opengl )
 	portaudio? ( media-libs/portaudio )
 	pulseaudio? ( media-sound/pulseaudio )
-	net-libs/polarssl
 	"
 DEPEND="${RDEPEND}
 	app-arch/zip
@@ -92,7 +92,9 @@ src_prepare() {
 	# - SOIL: The sources are not public.
 	# - Bochs-disasm: Don't know what it is.
 	# - GL: A custom gl.h file is used.
-	# - gtest: No idea. Removal causes build failure.
+	# - polarssl: Not fully supported yet.
+	# - gtest: Their build set up solely relies on the build in gtest.
+	# - xxhash: Not on the tree.
 	mv Externals/SOIL . || die
 	mv Externals/Bochs_disasm . || die
 	mv Externals/GL . || die
@@ -104,8 +106,6 @@ src_prepare() {
 	mv GL Externals || die
 	mv gtest Externals || die
 	mv xxhash Externals || die
-
-	epatch_user
 }
 
 src_configure() {
@@ -137,7 +137,7 @@ src_install() {
 	fi
 
 	doicon Installer/dolphin-emu.xpm
-	make_desktop_entry "dolphin-emu" "Dolphin" "Dolphin" "Game;"
+	make_desktop_entry "dolphin-emu" "Dolphin Emulator" "dolphin-emu" "Game;Emulator;"
 
 	prepgamesdirs
 }
