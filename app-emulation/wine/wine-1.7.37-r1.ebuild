@@ -343,11 +343,11 @@ src_prepare() {
 		ewarn "which is unsupported by Wine developers. Please don't report bugs"
 		ewarn "to Wine bugzilla unless you can reproduce them with USE=-pipelight"
 
-		pushd "${WORKDIR}/${COMPHOLIO_P}"/patches || die "couldn't move to patch directory"
+		pushd "${WORKDIR}/${COMPHOLIO_P}"/patches >/dev/null || die "couldn't move to patch directory"
 		# remove exit 0 from script, because this causes portage error, and because its stupid to do so anyway
 		sed -i -e 's/exit 0//g' patchinstall.sh || die "couldn't remove exit 0"
 		source patchinstall.sh DESTDIR="${S}" --backend=epatch --all --no-autoconf || die "something bad happend"
-		popd || die "couldn't move back"
+		popd >/dev/null || die "couldn't move back"
 		PATCHES+=( "${FILESDIR}"/${PN}-1.7.34-pipelight-win64-corruption-wine-staging-270.patch )
 	else
 		PATCHES+=( "${FILESDIR}"/${PN}-1.7.34-win64-corruption-wine-staging-270.patch )
