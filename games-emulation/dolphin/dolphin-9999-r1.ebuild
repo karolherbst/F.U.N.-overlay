@@ -100,12 +100,14 @@ src_prepare() {
 	mv Externals/GL . || die
 	mv Externals/gtest . || die
 	mv Externals/xxhash . || die
+	mv Externals/enet . || die
 	rm -r Externals/* || die "Failed to delete Externals dir."
 	mv Bochs_disasm Externals || die
 	mv SOIL Externals || die
 	mv GL Externals || die
 	mv gtest Externals || die
 	mv xxhash Externals || die
+	mv enet Externals || die
 }
 
 src_configure() {
