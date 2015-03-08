@@ -22,8 +22,8 @@ else
 	S=${WORKDIR}/${MY_P}
 fi
 
-GV="2.34"
-MV="4.5.4"
+GV="2.36"
+MV="4.5.6"
 COMPHOLIO_P="wine-staging-${PV}"
 WINE_GENTOO="wine-gentoo-2013.06.24"
 DESCRIPTION="Free implementation of Windows(tm) on Unix"
