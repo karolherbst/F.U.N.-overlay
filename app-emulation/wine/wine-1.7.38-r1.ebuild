@@ -40,7 +40,7 @@ SRC_URI="${SRC_URI}
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cups custom-cflags d3dadapter dos elibc_glibc +fontconfig +gecko gphoto2 gsm gstreamer +jpeg lcms ldap +mono mp3 ncurses netapi nls odbc openal opencl +opengl osmesa oss +perl pcap pipelight +png +prelink pulseaudio +realtime +run-exes samba scanner selinux +ssl test +threads +truetype +udisks v4l +X xcomposite xinerama +xml"
+IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cups custom-cflags d3dadapter dos elibc_glibc +fontconfig +gecko gphoto2 gsm +jpeg lcms ldap +mono mp3 ncurses netapi nls odbc openal opencl +opengl osmesa oss +perl pcap pipelight +png +prelink pulseaudio +realtime +run-exes samba scanner selinux +ssl test +threads +truetype +udisks v4l +X xcomposite xinerama +xml"
 REQUIRED_USE="|| ( abi_x86_32 abi_x86_64 )
 	test? ( abi_x86_32 )
 	elibc_glibc? ( threads )
@@ -59,7 +59,6 @@ NATIVE_DEPEND="
 	fontconfig? ( media-libs/fontconfig:= )
 	gphoto2? ( media-libs/libgphoto2:= )
 	openal? ( media-libs/openal:= )
-	gstreamer? ( media-libs/gstreamer:0.10 media-libs/gst-plugins-base:0.10 )
 	X? (
 		x11-libs/libXcursor
 		x11-libs/libXext
@@ -126,13 +125,6 @@ COMMON_DEPEND="
 			openal? ( || (
 				app-emulation/emul-linux-x86-sdl[development,-abi_x86_32(-)]
 				>=media-libs/openal-1.15.1[abi_x86_32(-)]
-			) )
-			gstreamer? ( || (
-				app-emulation/emul-linux-x86-medialibs[development,-abi_x86_32(-)]
-				(
-					>=media-libs/gstreamer-0.10.36-r2:0.10[abi_x86_32(-)]
-					>=media-libs/gst-plugins-base-0.10.36:0.10[abi_x86_32(-)]
-				)
 			) )
 			X? ( || (
 				app-emulation/emul-linux-x86-xlibs[development,-abi_x86_32(-)]
@@ -331,13 +323,6 @@ src_prepare() {
 	local COMPHOLIO_MAKE_ARGS="-W fonts-Missing_Fonts.ok"
 
 	use pulseaudio || COMPHOLIO_MAKE_ARGS="${COMPHOLIO_MAKE_ARGS} -W winepulse-PulseAudio_Support.ok"
-	if use gstreamer; then
-		# See http://bugs.winehq.org/show_bug.cgi?id=30557
-		ewarn "Applying experimental patch to fix GStreamer support. Note that"
-		ewarn "this patch has been reported to cause crashes in certain games."
-
-		PATCHES+=( "${FILESDIR}/${PN}-1.7.28-gstreamer-v4.patch" )
-	fi
 	if use pipelight; then
 		ewarn "Applying the unofficial Compholio patchset for Pipelight support,"
 		ewarn "which is unsupported by Wine developers. Please don't report bugs"
@@ -392,7 +377,7 @@ multilib_src_configure() {
 		$(use_with ssl gnutls)
 		$(use_with gphoto2 gphoto)
 		$(use_with gsm)
-		$(use_with gstreamer)
+		--without-gstreamer
 		--without-hal
 		$(use_with jpeg)
 		$(use_with ldap)
