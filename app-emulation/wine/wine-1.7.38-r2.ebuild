@@ -380,8 +380,12 @@ src_prepare() {
 			source "${STAGING_DIR}/patches/patchinstall.sh"
 		)
 		eend $?
-	elif use pulseaudio; then
-		PATCHES+=( "${STAGING_DIR}/patches/winepulse-PulseAudio_Support"/*.patch )
+		PATCHES+=( "${FILESDIR}"/${PN}-1.7.34-pipelight-win64-corruption-wine-staging-270.patch )
+	else
+		if use pulseaudio; then
+			PATCHES+=( "${STAGING_DIR}/patches/winepulse-PulseAudio_Support"/*.patch )
+		fi
+		PATCHES+=( "${FILESDIR}"/${PN}-1.7.34-win64-corruption-wine-staging-270.patch )
 	fi
 	autotools-utils_src_prepare
 
