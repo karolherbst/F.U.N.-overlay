@@ -1,6 +1,6 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.7.33.ebuild,v 1.1 2015/01/01 21:01:23 ryao Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.7.38.ebuild,v 1.1 2015/03/08 07:00:24 tetromino Exp $
 
 EAPI="5"
 
@@ -12,7 +12,8 @@ inherit autotools-utils eutils fdo-mime flag-o-matic gnome2-utils l10n multilib 
 
 if [[ ${PV} == "9999" ]] ; then
 	EGIT_REPO_URI="git://source.winehq.org/git/wine.git"
-	inherit git-2
+	EGIT_BRANCH="master"
+	inherit git-r3
 	SRC_URI=""
 	#KEYWORDS=""
 else
@@ -24,8 +25,10 @@ fi
 
 GV="2.36"
 MV="4.5.6"
-COMPHOLIO_P="wine-staging-${PV}"
-WINE_GENTOO="wine-gentoo-2013.06.24"
+STAGING_P="wine-staging-${PV}"
+STAGING_DIR="${WORKDIR}/${STAGING_P}"
+WINE_GENTOO="wine-gentoo-2015.03.07"
+GST_P="wine-1.7.34-gstreamer-v5"
 DESCRIPTION="Free implementation of Windows(tm) on Unix"
 HOMEPAGE="http://www.winehq.org/"
 SRC_URI="${SRC_URI}
@@ -34,17 +37,27 @@ SRC_URI="${SRC_URI}
 		abi_x86_64? ( mirror://sourceforge/${PN}/Wine%20Gecko/${GV}/wine_gecko-${GV}-x86_64.msi )
 	)
 	mono? ( mirror://sourceforge/${PN}/Wine%20Mono/${MV}/wine-mono-${MV}.msi )
-	pipelight? ( https://github.com/wine-compholio/wine-staging/archive/v${PV}.tar.gz -> ${COMPHOLIO_P}.tar.gz )
-	pulseaudio? ( https://github.com/wine-compholio/wine-staging/archive/v${PV}.tar.gz -> ${COMPHOLIO_P}.tar.gz )
+	gstreamer? ( http://dev.gentoo.org/~tetromino/distfiles/${PN}/${GST_P}.patch.bz2 )
 	http://dev.gentoo.org/~tetromino/distfiles/${PN}/${WINE_GENTOO}.tar.bz2"
+
+if [[ ${PV} == "9999" ]] ; then
+	STAGING_EGIT_REPO_URI="git://github.com/wine-compholio/wine-staging.git"
+else
+	SRC_URI="${SRC_URI}
+	staging? ( https://github.com/wine-compholio/wine-staging/archive/v${PV}.tar.gz -> ${STAGING_P}.tar.gz )
+	pulseaudio? ( https://github.com/wine-compholio/wine-staging/archive/v${PV}.tar.gz -> ${STAGING_P}.tar.gz )"
+fi
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cups custom-cflags d3dadapter dos elibc_glibc +fontconfig +gecko gphoto2 gsm +jpeg lcms ldap +mono mp3 ncurses netapi nls odbc openal opencl +opengl osmesa oss +perl pcap pipelight +png +prelink pulseaudio +realtime +run-exes samba scanner selinux +ssl test +threads +truetype +udisks v4l +X xcomposite xinerama +xml"
+IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cups custom-cflags d3dadapter dos elibc_glibc +fontconfig +gecko gphoto2 gsm gstreamer +jpeg +lcms ldap +mono mp3 ncurses netapi nls odbc openal opencl +opengl osmesa oss +perl pcap pipelight +png +prelink pulseaudio +realtime +run-exes s3tc samba scanner selinux +ssl staging test +threads +truetype +udisks v4l vaapi +X +xcomposite xinerama +xml"
 REQUIRED_USE="|| ( abi_x86_32 abi_x86_64 )
 	test? ( abi_x86_32 )
 	elibc_glibc? ( threads )
 	mono? ( abi_x86_32 )
+	pipelight? ( staging )
+	s3tc? ( staging )
+	vaapi? ( staging )
 	osmesa? ( opengl )" #286560
 
 # FIXME: the test suite is unsuitable for us; many tests require net access
@@ -59,6 +72,7 @@ NATIVE_DEPEND="
 	fontconfig? ( media-libs/fontconfig:= )
 	gphoto2? ( media-libs/libgphoto2:= )
 	openal? ( media-libs/openal:= )
+	gstreamer? ( media-libs/gstreamer:0.10 media-libs/gst-plugins-base:0.10 )
 	X? (
 		x11-libs/libXcursor
 		x11-libs/libXext
@@ -84,18 +98,15 @@ NATIVE_DEPEND="
 	odbc? ( dev-db/unixODBC:= )
 	osmesa? ( media-libs/mesa[osmesa] )
 	pcap? ( net-libs/libpcap )
-	pipelight? ( sys-apps/attr )
+	staging? ( sys-apps/attr )
 	pulseaudio? ( media-sound/pulseaudio )
 	xml? ( dev-libs/libxml2 dev-libs/libxslt )
 	scanner? ( media-gfx/sane-backends:= )
 	ssl? ( net-libs/gnutls:= )
 	png? ( media-libs/libpng:0= )
 	v4l? ( media-libs/libv4l )
-	xcomposite? ( x11-libs/libXcomposite )
-	d3dadapter? (
-		>=media-libs/mesa-10.4[d3d9]
-		x11-libs/libXfixes
-	)"
+	vaapi? ( x11-libs/libva[X] )
+	xcomposite? ( x11-libs/libXcomposite )"
 
 COMMON_DEPEND="
 	!amd64? ( ${NATIVE_DEPEND} )
@@ -125,6 +136,13 @@ COMMON_DEPEND="
 			openal? ( || (
 				app-emulation/emul-linux-x86-sdl[development,-abi_x86_32(-)]
 				>=media-libs/openal-1.15.1[abi_x86_32(-)]
+			) )
+			gstreamer? ( || (
+				app-emulation/emul-linux-x86-medialibs[development,-abi_x86_32(-)]
+				(
+					>=media-libs/gstreamer-0.10.36-r2:0.10[abi_x86_32(-)]
+					>=media-libs/gst-plugins-base-0.10.36:0.10[abi_x86_32(-)]
+				)
 			) )
 			X? ( || (
 				app-emulation/emul-linux-x86-xlibs[development,-abi_x86_32(-)]
@@ -190,13 +208,13 @@ COMMON_DEPEND="
 				>=media-libs/mesa-9.1.6[osmesa,abi_x86_32(-)]
 			) )
 			pcap? ( net-libs/libpcap[abi_x86_32(-)] )
-			pipelight? ( || (
-				app-emulation/emul-linux-x86-baselibs[development,-abi_x86_32(-)]
-				>=sys-apps/attr-2.4.47-r1[abi_x86_32(-)]
-			) )
 			pulseaudio? ( || (
 				app-emulation/emul-linux-x86-soundlibs[development,-abi_x86_32(-)]
 				>=media-sound/pulseaudio-5.0[abi_x86_32(-)]
+			) )
+			staging? ( || (
+				app-emulation/emul-linux-x86-baselibs[development,-abi_x86_32(-)]
+				>=sys-apps/attr-2.4.47-r1[abi_x86_32(-)]
 			) )
 			xml? ( || (
 				>=app-emulation/emul-linux-x86-baselibs-20131008[development,-abi_x86_32(-)]
@@ -221,6 +239,7 @@ COMMON_DEPEND="
 				app-emulation/emul-linux-x86-medialibs[development,-abi_x86_32(-)]
 				>=media-libs/libv4l-0.9.5[abi_x86_32(-)]
 			) )
+			vaapi? ( x11-libs/libva[X,abi_x86_32(-)] )
 			xcomposite? ( || (
 				app-emulation/emul-linux-x86-xlibs[development,-abi_x86_32(-)]
 				>=x11-libs/libXcomposite-0.4.4-r1[abi_x86_32(-)]
@@ -238,13 +257,16 @@ COMMON_DEPEND="
 RDEPEND="${COMMON_DEPEND}
 	dos? ( games-emulation/dosbox )
 	perl? ( dev-lang/perl dev-perl/XML-Simple )
+	s3tc? ( >=media-libs/libtxc_dxtn-1.0.1-r1[${MULTILIB_USEDEP}] )
 	samba? ( >=net-fs/samba-3.0.25 )
 	selinux? ( sec-policy/selinux-wine )
 	udisks? ( sys-fs/udisks:2 )
 	pulseaudio? ( realtime? ( sys-auth/rtkit ) )"
 
+# tools/make_requests requires perl
 DEPEND="${COMMON_DEPEND}
 	amd64? ( abi_x86_32? ( !abi_x86_64? ( ${NATIVE_DEPEND} ) ) )
+	staging? ( dev-lang/perl dev-perl/XML-Simple )
 	X? (
 		x11-proto/inputproto
 		x11-proto/xextproto
@@ -291,21 +313,25 @@ pkg_setup() {
 
 src_unpack() {
 	if [[ ${PV} == "9999" ]] ; then
-		git-2_src_unpack
+		git-r3_src_unpack
+		if use staging || use pulseaudio; then
+			EGIT_REPO_URI=${STAGING_EGIT_REPO_URI}
+			unset ${PN}_LIVE_REPO;
+			EGIT_CHECKOUT_DIR=${STAGING_DIR} git-r3_src_unpack
+		fi
 	else
 		unpack ${MY_P}.tar.bz2
+		use staging || use pulseaudio && unpack "${STAGING_P}.tar.gz"
 	fi
 
-	use pipelight || use pulseaudio && unpack "${COMPHOLIO_P}.tar.gz"
-
 	unpack "${WINE_GENTOO}.tar.bz2"
+	use gstreamer && unpack "${GST_P}.patch.bz2"
 
 	l10n_find_plocales_changes "${S}/po" "" ".po"
 }
 
 src_prepare() {
 	local md5="$(md5sum server/protocol.def)"
-	local f
 	local PATCHES=(
 		"${FILESDIR}"/${PN}-1.5.26-winegcc.patch #260726
 		"${FILESDIR}"/${PN}-1.4_rc2-multilib-portage.patch #395615
@@ -320,28 +346,46 @@ src_prepare() {
 	if use d3dadapter; then
 		PATCHES+=( "${FILESDIR}"/${PN}-1.7.33-d3d9adapter.patch )
 	fi
-	local COMPHOLIO_MAKE_ARGS="-W fonts-Missing_Fonts.ok"
+	if use gstreamer; then
+		# See http://bugs.winehq.org/show_bug.cgi?id=30557
+		ewarn "Applying experimental patch to fix GStreamer support. Note that"
+		ewarn "this patch has been reported to cause crashes in certain games."
 
-	use pulseaudio || COMPHOLIO_MAKE_ARGS="${COMPHOLIO_MAKE_ARGS} -W winepulse-PulseAudio_Support.ok"
-	if use pipelight; then
-		ewarn "Applying the unofficial Compholio patchset for Pipelight support,"
-		ewarn "which is unsupported by Wine developers. Please don't report bugs"
-		ewarn "to Wine bugzilla unless you can reproduce them with USE=-pipelight"
-
-		pushd "${WORKDIR}/${COMPHOLIO_P}"/patches >/dev/null || die "couldn't move to patch directory"
-		# remove exit 0 from script, because this causes portage error, and because its stupid to do so anyway
-		sed -i -e 's/exit 0//g' patchinstall.sh || die "couldn't remove exit 0"
-		source patchinstall.sh DESTDIR="${S}" --backend=epatch --all --no-autoconf || die "something bad happend"
-		popd >/dev/null || die "couldn't move back"
-		PATCHES+=( "${FILESDIR}"/${PN}-1.7.34-pipelight-win64-corruption-wine-staging-270.patch )
-	else
-		PATCHES+=( "${FILESDIR}"/${PN}-1.7.34-win64-corruption-wine-staging-270.patch )
-		if use pulseaudio; then
-			PATCHES+=( "../${COMPHOLIO_P}/patches/winepulse-PulseAudio_Support"/*.patch )
+		# Wine-Staging 1.7.38 "ntdll: Fix race-condition when threads are killed
+		# during shutdown" patch prevents the gstreamer patch from applying cleanly.
+		# So undo the staging patch, apply gstreamer, then re-apply rebased staging
+		# patch on top.
+		if use staging; then
+			PATCHES+=(
+				"${FILESDIR}/${PN}-1.7.38-gstreamer-v5-staging-pre.patch"
+				"${WORKDIR}/${GST_P}.patch"
+				"${FILESDIR}/${PN}-1.7.38-gstreamer-v5-staging-post.patch" )
+		else
+			PATCHES+=( "${WORKDIR}/${GST_P}.patch" )
 		fi
+	fi
+	if use staging; then
+		ewarn "Applying the unofficial Wine-Staging patchset which is unsupported"
+		ewarn "by Wine developers. Please don't report bugs to Wine bugzilla"
+		ewarn "unless you can reproduce them with USE=-staging"
+
+		local STAGING_EXCLUDE=""
+		use pipelight || STAGING_EXCLUDE="${STAGING_EXCLUDE} -W Pipelight"
+
+		# Launch wine-staging patcher in a subshell, using epatch as a backend, and gitapply.sh as a backend for binary patches
+		ebegin "Running Wine-Staging patch installer"
+		(
+			set -- DESTDIR="${S}" --backend=epatch --no-autoconf --all ${STAGING_EXCLUDE}
+			cd "${STAGING_DIR}/patches"
+			source "${STAGING_DIR}/patches/patchinstall.sh"
+		)
+		eend $?
+	elif use pulseaudio; then
+		PATCHES+=( "${STAGING_DIR}/patches/winepulse-PulseAudio_Support"/*.patch )
 	fi
 	autotools-utils_src_prepare
 
+	# Modification of the server protocol requires regenerating the server requests
 	if [[ "$(md5sum server/protocol.def)" != "${md5}" ]]; then
 		einfo "server/protocol.def was patched; running tools/make_requests"
 		tools/make_requests || die #432348
@@ -377,7 +421,7 @@ multilib_src_configure() {
 		$(use_with ssl gnutls)
 		$(use_with gphoto2 gphoto)
 		$(use_with gsm)
-		--without-gstreamer
+		$(use_with gstreamer)
 		--without-hal
 		$(use_with jpeg)
 		$(use_with ldap)
@@ -403,8 +447,13 @@ multilib_src_configure() {
 		$(use_with xml xslt)
 	)
 
-	use pulseaudio && myconf+=( --with-pulse )
-	use pipelight && myconf+=( --with-xattr )
+	if use pulseaudio || use staging; then
+		myconf+=( $(use_with pulseaudio pulse) )
+	fi
+	use staging && myconf+=(
+		--with-xattr
+		$(use_with vaapi va)
+	)
 	use d3dadapter && myconf+=(
 		--with-d3dadapter
 		--with-xfixes
@@ -468,7 +517,7 @@ multilib_src_install_all() {
 		insinto /usr/share/wine/mono
 		doins "${DISTDIR}"/wine-mono-${MV}.msi
 	fi
-	if ! use perl ; then
+	if ! use perl ; then # winedump calls function_grep.pl, and winemaker is a perl script
 		rm "${D}"usr/bin/{wine{dump,maker},function_grep.pl} "${D}"usr/share/man/man1/wine{dump,maker}.1 || die
 	fi
 
