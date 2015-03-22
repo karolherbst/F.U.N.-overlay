@@ -1,6 +1,6 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.7.38.ebuild,v 1.1 2015/03/08 07:00:24 tetromino Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-emulation/wine/wine-1.7.39.ebuild,v 1.1 2015/03/22 19:58:44 tetromino Exp $
 
 EAPI="5"
 
@@ -50,7 +50,7 @@ fi
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cups custom-cflags d3dadapter dos elibc_glibc +fontconfig +gecko gphoto2 gsm gstreamer +jpeg +lcms ldap +mono mp3 ncurses netapi nls odbc openal opencl +opengl osmesa oss +perl pcap pipelight +png +prelink pulseaudio +realtime +run-exes s3tc samba scanner selinux +ssl staging test +threads +truetype +udisks v4l vaapi +X +xcomposite xinerama +xml"
+IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cups custom-cflags dos elibc_glibc +fontconfig +gecko gphoto2 gsm gstreamer +jpeg +lcms ldap +mono mp3 ncurses netapi nls odbc openal opencl +opengl osmesa oss +perl pcap pipelight +png +prelink pulseaudio +realtime +run-exes s3tc samba scanner selinux +ssl staging test +threads +truetype +udisks v4l vaapi +X +xcomposite xinerama +xml"
 REQUIRED_USE="|| ( abi_x86_32 abi_x86_64 )
 	test? ( abi_x86_32 )
 	elibc_glibc? ( threads )
@@ -244,13 +244,6 @@ COMMON_DEPEND="
 				app-emulation/emul-linux-x86-xlibs[development,-abi_x86_32(-)]
 				>=x11-libs/libXcomposite-0.4.4-r1[abi_x86_32(-)]
 			) )
-			d3dadapter? ( || (
-				>=media-libs/mesa-10.4[d3d9,abi_x86_32(-)]
-				|| (
-					app-emulation/emul-linux-x86-xlibs[development,-abi_x86_32(-)]
-					x11-libs/libXfixes[abi_x86_32(-)]
-				)
-			) )
 		)
 	)"
 
@@ -343,23 +336,22 @@ src_prepare() {
 #		"${FILESDIR}"/4-XInputGetState.patch
 		"${FILESDIR}"/${PN}-ToUnicodeEx-dead-key.patch
 	)
-	if use d3dadapter; then
-		PATCHES+=( "${FILESDIR}"/${PN}-1.7.33-d3d9adapter.patch )
-	fi
 	if use gstreamer; then
 		# See http://bugs.winehq.org/show_bug.cgi?id=30557
 		ewarn "Applying experimental patch to fix GStreamer support. Note that"
 		ewarn "this patch has been reported to cause crashes in certain games."
 
 		# Wine-Staging 1.7.38 "ntdll: Fix race-condition when threads are killed
-		# during shutdown" patch prevents the gstreamer patch from applying cleanly.
+		# during shutdown" patch and "Added patch to implement shared memory
+		# wineserver communication for various user32 functions" prevents the
+		# gstreamer patch from applying cleanly.
 		# So undo the staging patch, apply gstreamer, then re-apply rebased staging
 		# patch on top.
 		if use staging; then
 			PATCHES+=(
-				"${FILESDIR}/${PN}-1.7.38-gstreamer-v5-staging-pre.patch"
+				"${FILESDIR}/${PN}-1.7.39-gstreamer-v5-staging-pre.patch"
 				"${WORKDIR}/${GST_P}.patch"
-				"${FILESDIR}/${PN}-1.7.38-gstreamer-v5-staging-post.patch" )
+				"${FILESDIR}/${PN}-1.7.39-gstreamer-v5-staging-post.patch" )
 		else
 			PATCHES+=( "${WORKDIR}/${GST_P}.patch" )
 		fi
@@ -457,11 +449,6 @@ multilib_src_configure() {
 	use staging && myconf+=(
 		--with-xattr
 		$(use_with vaapi va)
-	)
-	use d3dadapter && myconf+=(
-		--with-d3dadapter
-		--with-xfixes
-		--without-d3dadapter_dri2_fallback
 	)
 
 	local PKG_CONFIG AR RANLIB
