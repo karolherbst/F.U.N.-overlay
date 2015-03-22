@@ -32,6 +32,7 @@ fi
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS=""
+RESTRICT="!bindist? ( bindist )"
 
 INTEL_CARDS="i915 i965 ilo intel"
 RADEON_CARDS="r100 r200 r300 r600 radeon radeonsi"
@@ -42,29 +43,22 @@ done
 
 IUSE="${IUSE_VIDEO_CARDS}
 	bindist +classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 +llvm
-	+nptl opencl osmesa pax_kernel openmax pic r600-llvm-compiler selinux
-	+udev vaapi vdpau wayland xvmc xa kernel_FreeBSD"
+	+nptl opencl osmesa pax_kernel openmax pic selinux +udev vaapi vdpau
+	wayland xvmc xa kernel_FreeBSD"
 
 REQUIRED_USE="
 	d3d9?   ( dri3 gallium video_cards_swrastg )
 	llvm?   ( gallium )
-	opencl? (
-		gallium
-		llvm
-		video_cards_r600? ( r600-llvm-compiler )
-		video_cards_radeon? ( r600-llvm-compiler )
-		video_cards_radeonsi? ( r600-llvm-compiler )
-	)
+	opencl? ( gallium llvm )
 	openmax? ( gallium )
 	gles1?  ( egl )
 	gles2?  ( egl )
-	r600-llvm-compiler? ( gallium llvm || ( video_cards_r600 video_cards_radeonsi video_cards_radeon ) )
 	vaapi? ( gallium )
 	vdpau? ( gallium )
 	wayland? ( egl gbm )
 	xa?  ( gallium )
 	video_cards_freedreno?  ( gallium )
-	video_cards_intel?  ( || ( classic ) )
+	video_cards_intel?  ( classic )
 	video_cards_i915?   ( || ( classic gallium ) )
 	video_cards_i965?   ( classic )
 	video_cards_ilo?    ( gallium )
@@ -148,7 +142,6 @@ done
 DEPEND="${RDEPEND}
 	${PYTHON_DEPS}
 	llvm? (
-		r600-llvm-compiler? ( sys-devel/llvm[video_cards_radeon] )
 		video_cards_radeonsi? ( sys-devel/llvm[video_cards_radeon] )
 	)
 	opencl? (
@@ -233,7 +226,6 @@ multilib_src_configure() {
 			$(use_enable d3d9 nine)
 			$(use_enable llvm gallium-llvm)
 			$(use_enable openmax omx)
-			$(use_enable r600-llvm-compiler)
 			$(use_enable vaapi va)
 			$(use_enable vdpau)
 			$(use_enable xa)
