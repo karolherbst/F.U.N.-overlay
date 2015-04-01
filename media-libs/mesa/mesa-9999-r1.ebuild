@@ -75,16 +75,16 @@ REQUIRED_USE="
 	video_cards_swrastg?	( gallium llvm )
 "
 
-LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.57"
+LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.60"
 # keep correct libdrm and dri2proto dep
 # keep blocks in rdepend for binpkg
 RDEPEND="
 	!<x11-base/xorg-server-1.7
 	!<=x11-proto/xf86driproto-2.0.3
 	abi_x86_32? ( !app-emulation/emul-linux-x86-opengl[-abi_x86_32(-)] )
-	classic? ( app-admin/eselect-mesa )
-	gallium? ( app-admin/eselect-mesa )
-	>=app-admin/eselect-opengl-1.3.0
+	classic? ( app-eselect/eselect-mesa )
+	gallium? ( app-eselect/eselect-mesa )
+	>=app-eselect/eselect-opengl-1.3.0
 	udev? ( kernel_linux? ( >=virtual/libudev-215:=[${MULTILIB_USEDEP}] ) )
 	>=dev-libs/expat-2.1.0-r3:=[${MULTILIB_USEDEP}]
 	gbm? ( >=virtual/libudev-215:=[${MULTILIB_USEDEP}] )
@@ -95,12 +95,9 @@ RDEPEND="
 	>=x11-libs/libXext-1.3.2:=[${MULTILIB_USEDEP}]
 	>=x11-libs/libXxf86vm-1.1.3:=[${MULTILIB_USEDEP}]
 	>=x11-libs/libxcb-1.9.3:=[${MULTILIB_USEDEP}]
+	x11-libs/libXfixes:=[${MULTILIB_USEDEP}]
 	llvm? (
 		video_cards_radeonsi? ( || (
-			>=dev-libs/elfutils-0.155-r1:=[${MULTILIB_USEDEP}]
-			>=dev-libs/libelf-0.8.13-r2:=[${MULTILIB_USEDEP}]
-			) )
-		video_cards_r600? ( || (
 			>=dev-libs/elfutils-0.155-r1:=[${MULTILIB_USEDEP}]
 			>=dev-libs/libelf-0.8.13-r2:=[${MULTILIB_USEDEP}]
 			) )
@@ -113,7 +110,7 @@ RDEPEND="
 		>=sys-devel/llvm-3.4.2:=[${MULTILIB_USEDEP}]
 	)
 	opencl? (
-				app-admin/eselect-opencl
+				app-eselect/eselect-opencl
 				dev-libs/libclc
 				|| (
 					>=dev-libs/elfutils-0.155-r1:=[${MULTILIB_USEDEP}]
@@ -140,7 +137,6 @@ for card in ${RADEON_CARDS}; do
 done
 
 DEPEND="${RDEPEND}
-	${PYTHON_DEPS}
 	llvm? (
 		video_cards_radeonsi? ( sys-devel/llvm[video_cards_radeon] )
 	)
@@ -149,9 +145,6 @@ DEPEND="${RDEPEND}
 				>=sys-devel/clang-3.4.2:=[${MULTILIB_USEDEP}]
 				>=sys-devel/gcc-4.6
 	)
-	sys-devel/bison
-	sys-devel/flex
-	$(python_gen_any_dep ">=dev-python/mako-0.7.3[\${PYTHON_USEDEP}]")
 	sys-devel/gettext
 	virtual/pkgconfig
 	>=x11-proto/dri2proto-2.8-r1:=[${MULTILIB_USEDEP}]
@@ -163,6 +156,12 @@ DEPEND="${RDEPEND}
 	>=x11-proto/xextproto-7.2.1-r1:=[${MULTILIB_USEDEP}]
 	>=x11-proto/xf86driproto-2.1.1-r1:=[${MULTILIB_USEDEP}]
 	>=x11-proto/xf86vidmodeproto-2.3.1-r1:=[${MULTILIB_USEDEP}]
+"
+[[ ${PV} == "9999" ]] && DEPEND+="
+	sys-devel/bison
+	sys-devel/flex
+	${PYTHON_DEPS}
+	$(python_gen_any_dep ">=dev-python/mako-0.7.3[\${PYTHON_USEDEP}]")
 "
 
 S="${WORKDIR}/${MY_P}"
