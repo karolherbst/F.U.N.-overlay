@@ -8,7 +8,7 @@ inherit linux-mod
 
 DESCRIPTION="A driver for the Clevo P15xSM(1)(-A)/P17xSM(-A)/P370SM-A Laptop models"
 HOMEPAGE="http://www.linux-onlineshop.de/forum/index.php?page=Thread&threadID=26"
-SRC_URI="http://www.linux-onlineshop.de/forum/index.php?page=Attachment&attachmentID=262&h=98b12b8ddff00c49706504583dbaf5edb1ec3980&s=f3ceb43cbfbaa1d5f9906a395a1d425bb4d69135 -> ${P}.tar.gz"
+SRC_URI="http://www.linux-onlineshop.de/forum/index.php?page=Attachment&attachmentID=424&h=3df4c21145314ceaeadd7986662b2a5b01d1094f&s=17a5665e5572f4a1fb0b6e0cabf7eb36d9d6dc5a -> ${P}.tar.gz"
 
 SLOT="0"
 LICENSE="GPL-2+"
