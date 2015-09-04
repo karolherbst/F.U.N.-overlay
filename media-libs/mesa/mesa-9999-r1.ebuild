@@ -1,6 +1,6 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
+# $Id$
 
 EAPI=5
 
@@ -25,13 +25,14 @@ HOMEPAGE="http://mesa3d.sourceforge.net/"
 
 if [[ $PV == 9999* ]]; then
 	SRC_URI=""
+	KEYWORDS=""
 else
 	SRC_URI="ftp://ftp.freedesktop.org/pub/mesa/${FOLDER}/${MY_P}.tar.xz"
+	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-fbsd ~x86-fbsd ~x86-freebsd ~amd64-linux ~arm-linux ~ia64-linux ~x86-linux ~sparc-solaris ~x64-solaris ~x86-solaris"
 fi
 
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS=""
 RESTRICT="!bindist? ( bindist )"
 
 INTEL_CARDS="i915 i965 ilo intel"
@@ -86,7 +87,7 @@ REQUIRED_USE="
 	video_cards_swrastg?	( gallium llvm )
 "
 
-LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.60"
+LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.64"
 # keep correct libdrm and dri2proto dep
 # keep blocks in rdepend for binpkg
 RDEPEND="
@@ -130,7 +131,7 @@ RDEPEND="
 			)
 	openmax? ( >=media-libs/libomxil-bellagio-0.9.3:=[${MULTILIB_USEDEP}] )
 	vaapi? ( >=x11-libs/libva-0.35.0:=[${MULTILIB_USEDEP}] )
-	vdpau? ( >=x11-libs/libvdpau-0.7:=[${MULTILIB_USEDEP}] )
+	vdpau? ( >=x11-libs/libvdpau-1.1:=[${MULTILIB_USEDEP}] )
 	wayland? ( >=dev-libs/wayland-1.2.0:=[${MULTILIB_USEDEP}] )
 	xvmc? ( >=x11-libs/libXvMC-1.0.8:=[${MULTILIB_USEDEP}] )
 	${LIBDRM_DEPSTRING}[video_cards_freedreno?,video_cards_nouveau?,video_cards_vmware?,${MULTILIB_USEDEP}]
@@ -146,6 +147,9 @@ for card in ${RADEON_CARDS}; do
 		video_cards_${card}? ( ${LIBDRM_DEPSTRING}[video_cards_radeon] )
 	"
 done
+RDEPEND="${RDEPEND}
+	video_cards_radeonsi? ( ${LIBDRM_DEPSTRING}[video_cards_amdgpu] )
+"
 
 DEPEND="${RDEPEND}
 	llvm? (
@@ -178,10 +182,16 @@ DEPEND="${RDEPEND}
 S="${WORKDIR}/${MY_P}"
 EGIT_CHECKOUT_DIR=${S}
 
-# It is slow without texrels, if someone wants slow
-# mesa without texrels +pic use is worth the shot
-QA_EXECSTACK="usr/lib*/libGL.so*"
-QA_WX_LOAD="usr/lib*/libGL.so*"
+QA_WX_LOAD="
+x86? (
+	!pic? (
+		usr/lib*/libglapi.so.0.0.0
+		usr/lib*/libGLESv1_CM.so.1.1.0
+		usr/lib*/libGLESv2.so.2.0.0
+		usr/lib*/libGL.so.1.2.0
+		usr/lib*/libOSMesa.so.8.0.0
+	)
+)"
 
 pkg_setup() {
 	# warning message for bug 459306
@@ -259,6 +269,8 @@ multilib_src_configure() {
 			$(use_enable xa)
 			$(use_enable xvmc)
 		"
+		use vaapi && myconf+="--with-va-libdir=/usr/$(get_libdir)/va/drivers"
+
 		gallium_enable video_cards_swrastg swrast
 		gallium_enable video_cards_vmware svga
 		gallium_enable video_cards_nouveau nouveau
@@ -307,7 +319,6 @@ multilib_src_configure() {
 		--enable-dri \
 		--enable-glx \
 		--enable-shared-glapi \
-		--disable-shader-cache \
 		$(use_enable !bindist texture-float) \
 		$(use_enable d3d9 nine) \
 		$(use_enable debug) \
