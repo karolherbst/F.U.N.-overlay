@@ -37,7 +37,7 @@ RESTRICT="!bindist? ( bindist )"
 
 INTEL_CARDS="i915 i965 ilo intel"
 RADEON_CARDS="r100 r200 r300 r600 radeon radeonsi"
-VIDEO_CARDS="${INTEL_CARDS} ${RADEON_CARDS} freedreno nouveau swrastc swrastg vmware"
+VIDEO_CARDS="${INTEL_CARDS} ${RADEON_CARDS} freedreno nouveau nouveau_vieux swrastc swrastg vmware"
 for card in ${VIDEO_CARDS}; do
 	IUSE_VIDEO_CARDS+=" video_cards_${card}"
 done
@@ -74,7 +74,8 @@ REQUIRED_USE="
 	video_cards_i915?   ( || ( classic gallium ) )
 	video_cards_i965?   ( classic )
 	video_cards_ilo?    ( gallium )
-	video_cards_nouveau? ( || ( classic gallium ) )
+	video_cards_nouveau? ( gallium )
+	video_cards_nouveau_vieux?	( classic )
 	video_cards_radeon? ( || ( classic gallium ) )
 	video_cards_r100?   ( classic )
 	video_cards_r200?   ( classic )
@@ -108,7 +109,7 @@ RDEPEND="
 	>=x11-libs/libXxf86vm-1.1.3:=[${MULTILIB_USEDEP}]
 	>=x11-libs/libxcb-1.9.3:=[${MULTILIB_USEDEP}]
 	x11-libs/libXfixes:=[${MULTILIB_USEDEP}]
-	llvm? (
+	llvm? ( !kernel_FreeBSD? (
 		video_cards_radeonsi? ( || (
 			>=dev-libs/elfutils-0.155-r1:=[${MULTILIB_USEDEP}]
 			>=dev-libs/libelf-0.8.13-r2:=[${MULTILIB_USEDEP}]
@@ -118,22 +119,24 @@ RDEPEND="
 				>=dev-libs/elfutils-0.155-r1:=[${MULTILIB_USEDEP}]
 				>=dev-libs/libelf-0.8.13-r2:=[${MULTILIB_USEDEP}]
 				) )
-		)
+		) )
 		>=sys-devel/llvm-3.4.2:=[${MULTILIB_USEDEP}]
 	)
 	opencl? (
 				app-eselect/eselect-opencl
 				dev-libs/libclc
-				|| (
+				!kernel_FreeBSD? ( || (
 					>=dev-libs/elfutils-0.155-r1:=[${MULTILIB_USEDEP}]
 					>=dev-libs/libelf-0.8.13-r2:=[${MULTILIB_USEDEP}]
-				)
+				) )
 			)
 	openmax? ( >=media-libs/libomxil-bellagio-0.9.3:=[${MULTILIB_USEDEP}] )
 	vaapi? ( >=x11-libs/libva-0.35.0:=[${MULTILIB_USEDEP}] )
 	vdpau? ( >=x11-libs/libvdpau-1.1:=[${MULTILIB_USEDEP}] )
 	wayland? ( >=dev-libs/wayland-1.2.0:=[${MULTILIB_USEDEP}] )
 	xvmc? ( >=x11-libs/libXvMC-1.0.8:=[${MULTILIB_USEDEP}] )
+
+	video_cards_nouveau_vieux? ( ${LIBDRM_DEPSTRING}[nouveau] )
 	${LIBDRM_DEPSTRING}[video_cards_freedreno?,video_cards_nouveau?,video_cards_vmware?,${MULTILIB_USEDEP}]
 "
 for card in ${INTEL_CARDS}; do
@@ -172,7 +175,7 @@ DEPEND="${RDEPEND}
 	>=x11-proto/xf86driproto-2.1.1-r1:=[${MULTILIB_USEDEP}]
 	>=x11-proto/xf86vidmodeproto-2.3.1-r1:=[${MULTILIB_USEDEP}]
 "
-[[ ${PV} == "9999" ]] && DEPEND+="
+[[ ${PV} == 9999 ]] && DEPEND+="
 	sys-devel/bison
 	sys-devel/flex
 	${PYTHON_DEPS}
@@ -225,7 +228,7 @@ src_prepare() {
 
 	use ixit && epatch "${D3D9_DIR}/mesa-d3d9.patch"
 
-	eautoreconf
+	[[ ${PV} == 9999 ]] && eautoreconf
 }
 
 multilib_src_configure() {
@@ -244,7 +247,7 @@ multilib_src_configure() {
 		fi
 
 		# Nouveau code
-		driver_enable video_cards_nouveau nouveau
+		driver_enable video_cards_nouveau_vieux nouveau
 
 		# ATI code
 		driver_enable video_cards_r100 radeon
@@ -300,10 +303,8 @@ multilib_src_configure() {
 	fi
 
 	# x86 hardened pax_kernel needs glx-rts, bug 240956
-	if use pax_kernel; then
-		myconf+="
-			$(use_enable x86 glx-rts)
-		"
+	if [[ ${ABI} == x86 ]]; then
+		myconf+="$(use_enable pax_kernel glx-read-only-text)"
 	fi
 
 	# on abi_x86_32 hardened we need to have asm disable
@@ -319,6 +320,7 @@ multilib_src_configure() {
 		--enable-dri \
 		--enable-glx \
 		--enable-shared-glapi \
+		--disable-shader-cache \
 		$(use_enable !bindist texture-float) \
 		$(use_enable d3d9 nine) \
 		$(use_enable debug) \
