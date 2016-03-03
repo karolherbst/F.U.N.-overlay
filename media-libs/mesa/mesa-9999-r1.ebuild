@@ -37,7 +37,7 @@ RESTRICT="!bindist? ( bindist )"
 
 INTEL_CARDS="i915 i965 ilo intel"
 RADEON_CARDS="r100 r200 r300 r600 radeon radeonsi"
-VIDEO_CARDS="${INTEL_CARDS} ${RADEON_CARDS} freedreno nouveau nouveau_vieux swrastc swrastg vmware"
+VIDEO_CARDS="${INTEL_CARDS} ${RADEON_CARDS} freedreno nouveau nouveau_vieux swrastc swrastg vmware swr"
 for card in ${VIDEO_CARDS}; do
 	IUSE_VIDEO_CARDS+=" video_cards_${card}"
 done
@@ -87,6 +87,7 @@ REQUIRED_USE="
 	${PYTHON_REQUIRED_USE}
 	video_cards_swrastc?	( classic )
 	video_cards_swrastg?	( gallium llvm )
+	video_cards_swr?	( gallium )
 "
 
 LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.64"
@@ -273,6 +274,7 @@ multilib_src_configure() {
 		use vaapi && myconf+=" --with-va-libdir=/usr/$(get_libdir)/va/drivers"
 
 		gallium_enable video_cards_swrastg swrast
+		gallium_enable video_cards_swr swr
 		gallium_enable video_cards_vmware svga
 		gallium_enable video_cards_nouveau nouveau
 		gallium_enable video_cards_i915 i915
@@ -328,7 +330,6 @@ multilib_src_configure() {
 		$(use_enable gles1) \
 		$(use_enable gles2) \
 		$(use_enable nptl glx-tls) \
-		$(use_enable osmesa) \
 		$(use_enable !udev sysfs) \
 		--enable-llvm-shared-libs \
 		--with-dri-drivers=${DRI_DRIVERS} \
