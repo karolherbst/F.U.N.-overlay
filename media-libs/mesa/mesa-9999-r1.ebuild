@@ -312,6 +312,12 @@ multilib_src_configure() {
 		myconf+=" --disable-asm"
 	fi
 
+	if use gallium; then
+		myconf+=" $(use_enable osmesa gallium-osmesa)"
+	else
+		myconf+=" $(use_enable osmesa)"
+	fi
+
 	# build fails with BSD indent, bug #428112
 	use userland_GNU || export INDENT=cat
 
