@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -53,8 +53,8 @@ else
 fi
 
 IUSE="${IUSE_VIDEO_CARDS}
-	bindist +classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 ixit
-	+llvm +nptl opencl osmesa pax_kernel openmax pic selinux +udev vaapi
+	bindist +classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 ixit +llvm
+	+nptl opencl osmesa pax_kernel openmax pic selinux +udev vaapi valgrind
 	vdpau wayland xvmc xa kernel_FreeBSD"
 
 REQUIRED_USE="
@@ -90,7 +90,7 @@ REQUIRED_USE="
 	video_cards_swr?	( gallium )
 "
 
-LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.64"
+LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.67"
 # keep correct libdrm and dri2proto dep
 # keep blocks in rdepend for binpkg
 RDEPEND="
@@ -120,7 +120,7 @@ RDEPEND="
 				>=dev-libs/libelf-0.8.13-r2:=[${MULTILIB_USEDEP}]
 				) )
 		) )
-		>=sys-devel/llvm-3.4.2:=[${MULTILIB_USEDEP}]
+		>=sys-devel/llvm-3.6.0:=[${MULTILIB_USEDEP}]
 	)
 	opencl? (
 				app-eselect/eselect-opencl
@@ -164,6 +164,7 @@ DEPEND="${RDEPEND}
 	)
 	sys-devel/gettext
 	virtual/pkgconfig
+	valgrind? ( dev-util/valgrind )
 	>=x11-proto/dri2proto-2.8-r1:=[${MULTILIB_USEDEP}]
 	dri3? (
 		>=x11-proto/dri3proto-1.0:=[${MULTILIB_USEDEP}]
@@ -222,11 +223,6 @@ src_unpack() {
 }
 
 src_prepare() {
-	# fix for hardened pax_kernel, bug 240956
-	[[ ${PV} != 9999* ]] && epatch "${FILESDIR}"/glx_ro_text_segm.patch
-
-	use ixit && epatch "${D3D9_DIR}/mesa-d3d9.patch"
-
 	[[ ${PV} == 9999 ]] && eautoreconf
 }
 
@@ -337,6 +333,7 @@ multilib_src_configure() {
 		$(use_enable gles2) \
 		$(use_enable nptl glx-tls) \
 		$(use_enable !udev sysfs) \
+		--enable-valgrind=$(usex valgrind auto no) \
 		--enable-llvm-shared-libs \
 		--with-dri-drivers=${DRI_DRIVERS} \
 		--with-gallium-drivers=${GALLIUM_DRIVERS} \
