@@ -42,24 +42,13 @@ for card in ${VIDEO_CARDS}; do
 	IUSE_VIDEO_CARDS+=" video_cards_${card}"
 done
 
-D3D9_P="mesa-d3d9-${PV}"
-D3D9_DIR="${WORKDIR}/mesa-d3d9-patches-${D3D9_P}"
-
-if [[ $PV == "9999" ]]; then
-	D3D9_EGIT_REPO_URI="git://github.com/NP-Hardass/mesa-d3d9-patches.git"
-else
-	SRC_URI="${SRC_URI}
-	ixit? ( https://github.com/NP-Hardass/mesa-d3d9-patches/archive/mesa-d3d9-${PV}.tar.gz -> ${D3D9_P}.tar.gz )"
-fi
-
 IUSE="${IUSE_VIDEO_CARDS}
-	bindist +classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 ixit +llvm
-	+nptl opencl osmesa pax_kernel openmax pic selinux +udev vaapi valgrind
+	bindist +classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 +llvm
+	+nptl opencl osmesa pax_kernel openmax pic selinux vaapi valgrind
 	vdpau wayland xvmc xa kernel_FreeBSD"
 
 REQUIRED_USE="
 	d3d9?   ( dri3 gallium video_cards_swrastg )
-	ixit?   ( d3d9 )
 	llvm?   ( gallium )
 	opencl? ( gallium llvm )
 	openmax? ( gallium )
@@ -100,7 +89,6 @@ RDEPEND="
 	classic? ( app-eselect/eselect-mesa )
 	gallium? ( app-eselect/eselect-mesa )
 	>=app-eselect/eselect-opengl-1.3.0
-	udev? ( kernel_linux? ( >=virtual/libudev-215:=[${MULTILIB_USEDEP}] ) )
 	>=dev-libs/expat-2.1.0-r3:=[${MULTILIB_USEDEP}]
 	>=x11-libs/libX11-1.6.2:=[${MULTILIB_USEDEP}]
 	>=x11-libs/libxshmfence-1.1:=[${MULTILIB_USEDEP}]
@@ -122,7 +110,10 @@ RDEPEND="
 				!kernel_FreeBSD? ( virtual/libelf:0=[${MULTILIB_USEDEP}] )
 			)
 	openmax? ( >=media-libs/libomxil-bellagio-0.9.3:=[${MULTILIB_USEDEP}] )
-	vaapi? ( >=x11-libs/libva-1.6.0:=[${MULTILIB_USEDEP}] )
+	vaapi? (
+		>=x11-libs/libva-1.6.0:=[${MULTILIB_USEDEP}]
+		video_cards_nouveau? ( !<=x11-libs/libva-vdpau-driver-0.7.4-r3 )
+	)
 	vdpau? ( >=x11-libs/libvdpau-1.1:=[${MULTILIB_USEDEP}] )
 	wayland? ( >=dev-libs/wayland-1.2.0:=[${MULTILIB_USEDEP}] )
 	xvmc? ( >=x11-libs/libXvMC-1.0.8:=[${MULTILIB_USEDEP}] )
@@ -144,9 +135,14 @@ RDEPEND="${RDEPEND}
 	video_cards_radeonsi? ( ${LIBDRM_DEPSTRING}[video_cards_amdgpu] )
 "
 
+# FIXME: kill the sys-devel/llvm[video_cards_radeon] compat once
+# LLVM < 3.9 is out of the game
 DEPEND="${RDEPEND}
 	llvm? (
-		video_cards_radeonsi? ( sys-devel/llvm[video_cards_radeon] )
+		video_cards_radeonsi? ( || (
+			sys-devel/llvm[llvm_targets_AMDGPU]
+			sys-devel/llvm[video_cards_radeon]
+		) )
 	)
 	opencl? (
 				>=sys-devel/llvm-3.4.2:=[${MULTILIB_USEDEP}]
@@ -195,22 +191,6 @@ pkg_setup() {
 	fi
 
 	python-any-r1_pkg_setup
-}
-
-src_unpack() {
-	if [[ $PV == "9999" ]]; then
-		git-r3_src_unpack
-		if use ixit; then
-			local esc_pn
-			esc_pn=${PN//[-+]/_}
-			unset ${esc_pn}_LIVE_REPO ${esc_pn}_LIVE_BRANCH ${esc_pn}_LIVE_COMMIT EGIT_COMMIT EGIT_BRANCH
-			local EGIT_REPO_URI=${D3D9_EGIT_REPO_URI}
-			EGIT_CHECKOUT_DIR=${D3D9_DIR} git-r3_src_unpack
-		fi
-	else
-		unpack ${MY_P}.tar.bz2
-		use ixit && unpack "{$D3D9_P}.tar.gz"
-	fi
 }
 
 src_prepare() {
@@ -324,7 +304,6 @@ multilib_src_configure() {
 		$(use_enable gles1) \
 		$(use_enable gles2) \
 		$(use_enable nptl glx-tls) \
-		$(use_enable !udev sysfs) \
 		--enable-valgrind=$(usex valgrind auto no) \
 		--enable-llvm-shared-libs \
 		--with-dri-drivers=${DRI_DRIVERS} \
