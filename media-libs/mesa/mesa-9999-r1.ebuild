@@ -1,10 +1,10 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
 EAPI=5
 
-EGIT_REPO_URI="git://anongit.freedesktop.org/mesa/mesa"
+EGIT_REPO_URI="https://anongit.freedesktop.org/git/mesa/mesa.git"
 
 if [[ ${PV} = 9999* ]]; then
 	GIT_ECLASS="git-r3"
@@ -37,17 +37,18 @@ RESTRICT="!bindist? ( bindist )"
 
 INTEL_CARDS="i915 i965 ilo intel"
 RADEON_CARDS="r100 r200 r300 r600 radeon radeonsi"
-VIDEO_CARDS="${INTEL_CARDS} ${RADEON_CARDS} freedreno nouveau nouveau_vieux swrastc swrastg vc4 vmware swr"
+VIDEO_CARDS="${INTEL_CARDS} ${RADEON_CARDS} freedreno imx nouveau nouveau_vieux swrastc swrastg vc4 vivante vmware swr"
 for card in ${VIDEO_CARDS}; do
 	IUSE_VIDEO_CARDS+=" video_cards_${card}"
 done
 
 IUSE="${IUSE_VIDEO_CARDS}
-	bindist +classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 +llvm
-	+nptl opencl osmesa pax_kernel openmax pic selinux vaapi valgrind
-	vdpau wayland xvmc xa kernel_FreeBSD"
+	bindist +classic d3d9 debug +dri3 +egl +gallium +gbm gcrypt gles1 gles2
+	libressl +llvm +nettle +nptl opencl osmesa pax_kernel openmax openssl pic
+	selinux vaapi valgrind vdpau vulkan wayland xvmc xa kernel_FreeBSD"
 
 REQUIRED_USE="
+	|| ( gcrypt libressl nettle openssl )
 	d3d9?   ( dri3 gallium video_cards_swrastg )
 	llvm?   ( gallium )
 	opencl? ( gallium llvm )
@@ -56,6 +57,7 @@ REQUIRED_USE="
 	gles2?  ( egl )
 	vaapi? ( gallium )
 	vdpau? ( gallium )
+	vulkan? ( || ( video_cards_i965 video_cards_radeonsi ) )
 	wayland? ( egl gbm )
 	xa?  ( gallium )
 	video_cards_freedreno?  ( gallium )
@@ -63,6 +65,7 @@ REQUIRED_USE="
 	video_cards_i915?   ( || ( classic gallium ) )
 	video_cards_i965?   ( classic )
 	video_cards_ilo?    ( gallium )
+	video_cards_imx?    ( gallium )
 	video_cards_nouveau? ( gallium )
 	video_cards_nouveau_vieux?	( classic )
 	video_cards_radeon? ( || ( classic gallium )
@@ -72,6 +75,7 @@ REQUIRED_USE="
 	video_cards_r300?   ( gallium x86? ( llvm ) amd64? ( llvm ) )
 	video_cards_r600?   ( gallium )
 	video_cards_radeonsi?   ( gallium llvm )
+	video_cards_vivante? ( gallium gbm )
 	video_cards_vmware? ( gallium )
 	${PYTHON_REQUIRED_USE}
 	video_cards_swrastc?	( classic )
@@ -79,7 +83,7 @@ REQUIRED_USE="
 	video_cards_swr?	( gallium )
 "
 
-LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.67"
+LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.72"
 # keep correct libdrm and dri2proto dep
 # keep blocks in rdepend for binpkg
 RDEPEND="
@@ -104,6 +108,14 @@ RDEPEND="
 		) )
 		>=sys-devel/llvm-3.6.0:=[${MULTILIB_USEDEP}]
 	)
+	nettle? ( dev-libs/nettle:=[${MULTILIB_USEDEP}] )
+	!nettle? (
+		gcrypt? ( dev-libs/libgcrypt:=[${MULTILIB_USEDEP}] )
+		!gcrypt? (
+			libressl? ( dev-libs/libressl:=[${MULTILIB_USEDEP}] )
+			!libressl? ( dev-libs/openssl:=[${MULTILIB_USEDEP}] )
+		)
+	)
 	opencl? (
 				app-eselect/eselect-opencl
 				dev-libs/libclc
@@ -118,7 +130,7 @@ RDEPEND="
 	wayland? ( >=dev-libs/wayland-1.2.0:=[${MULTILIB_USEDEP}] )
 	xvmc? ( >=x11-libs/libXvMC-1.0.8:=[${MULTILIB_USEDEP}] )
 	video_cards_nouveau_vieux? ( ${LIBDRM_DEPSTRING}[nouveau] )
-	${LIBDRM_DEPSTRING}[video_cards_freedreno?,video_cards_nouveau?,video_cards_vc4?,video_cards_vmware?,${MULTILIB_USEDEP}]
+	${LIBDRM_DEPSTRING}[video_cards_freedreno?,video_cards_nouveau?,video_cards_vc4?,video_cards_vivante?,video_cards_vmware?,${MULTILIB_USEDEP}]
 "
 for card in ${INTEL_CARDS}; do
 	RDEPEND="${RDEPEND}
@@ -243,10 +255,12 @@ multilib_src_configure() {
 		gallium_enable video_cards_swrastg swrast
 		gallium_enable video_cards_swr swr
 		gallium_enable video_cards_vc4 vc4
+		gallium_enable video_cards_vivante etnaviv
 		gallium_enable video_cards_vmware svga
 		gallium_enable video_cards_nouveau nouveau
 		gallium_enable video_cards_i915 i915
 		gallium_enable video_cards_ilo ilo
+		gallium_enable video_cards_imx imx
 		if ! use video_cards_i915 && \
 			! use video_cards_i965; then
 			gallium_enable video_cards_intel i915
@@ -268,6 +282,11 @@ multilib_src_configure() {
 				--with-clang-libdir="${EPREFIX}/usr/lib"
 				"
 		fi
+	fi
+
+	if use vulkan; then
+		vulkan_enable video_cards_i965 intel
+		vulkan_enable video_cards_radeonsi radeon
 	fi
 
 	# x86 hardened pax_kernel needs glx-rts, bug 240956
@@ -308,6 +327,8 @@ multilib_src_configure() {
 		--enable-llvm-shared-libs \
 		--with-dri-drivers=${DRI_DRIVERS} \
 		--with-gallium-drivers=${GALLIUM_DRIVERS} \
+		--with-vulkan-drivers=${VULKAN_DRIVERS} \
+		--with-sha1=$(usex nettle libnettle $(usex gcrypt libgcrypt libcrypto)) \
 		PYTHON2="${PYTHON}" \
 		${myconf}
 }
@@ -379,6 +400,11 @@ multilib_src_install_all() {
 	# Install config file for eselect mesa
 	insinto /usr/share/mesa
 	newins "${FILESDIR}/eselect-mesa.conf.9.2" eselect-mesa.conf
+
+	# Mesa should not install these
+	if use vulkan; then
+		rm "${ED}"/usr/include/vulkan/{vulkan.h,vk_platform.h} || die
+	fi
 }
 
 multilib_src_test() {
@@ -466,6 +492,23 @@ gallium_enable() {
 				shift
 				for i in $@; do
 					GALLIUM_DRIVERS+=",${i}"
+				done
+			fi
+			;;
+	esac
+}
+
+vulkan_enable() {
+	case $# in
+		# for enabling unconditionally
+		1)
+			VULKAN_DRIVERS+=",$1"
+			;;
+		*)
+			if use $1; then
+				shift
+				for i in $@; do
+					VULKAN_DRIVERS+=",${i}"
 				done
 			fi
 			;;
