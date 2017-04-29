@@ -1,6 +1,5 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=6
 
@@ -13,19 +12,17 @@ fi
 
 PYTHON_COMPAT=( python2_7 )
 
-inherit autotools multilib-minimal python-any-r1 pax-utils ${GIT_ECLASS}
+inherit autotools llvm multilib-minimal python-any-r1 pax-utils ${GIT_ECLASS}
 
 OPENGL_DIR="xorg-x11"
 
 MY_P="${P/_/-}"
-FOLDER="${PV/_rc*/}"
 
 DESCRIPTION="OpenGL-like graphic library for Linux"
-HOMEPAGE="http://mesa3d.sourceforge.net/"
+HOMEPAGE="https://www.mesa3d.org/"
 
 if [[ $PV == 9999* ]]; then
 	SRC_URI=""
-	KEYWORDS=""
 else
 	SRC_URI="https://mesa.freedesktop.org/archive/${MY_P}.tar.xz"
 	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~arm-linux ~x86-linux ~sparc-solaris ~x64-solaris ~x86-solaris"
@@ -76,13 +73,12 @@ REQUIRED_USE="
 	video_cards_radeonsi?   ( gallium llvm )
 	video_cards_vivante? ( gallium gbm )
 	video_cards_vmware? ( gallium )
-	${PYTHON_REQUIRED_USE}
 	video_cards_swrastc?	( classic )
 	video_cards_swrastg?	( gallium llvm )
 	video_cards_swr?	( gallium )
 "
 
-LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.72"
+LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.77"
 # keep correct libdrm and dri2proto dep
 # keep blocks in rdepend for binpkg
 RDEPEND="
@@ -93,6 +89,7 @@ RDEPEND="
 	gallium? ( app-eselect/eselect-mesa )
 	>=app-eselect/eselect-opengl-1.3.0
 	>=dev-libs/expat-2.1.0-r3:=[${MULTILIB_USEDEP}]
+	>=sys-libs/zlib-1.2.8[${MULTILIB_USEDEP}]
 	>=x11-libs/libX11-1.6.2:=[${MULTILIB_USEDEP}]
 	>=x11-libs/libxshmfence-1.1:=[${MULTILIB_USEDEP}]
 	>=x11-libs/libXdamage-1.1.4-r1:=[${MULTILIB_USEDEP}]
@@ -104,6 +101,12 @@ RDEPEND="
 		video_cards_radeonsi? (
 			virtual/libelf:0=[${MULTILIB_USEDEP}]
 			vulkan? ( >=sys-devel/llvm-3.9.0:=[${MULTILIB_USEDEP}] )
+		)
+		video_cards_r600? (
+			virtual/libelf:0=[${MULTILIB_USEDEP}]
+		)
+		video_cards_radeon? (
+			virtual/libelf:0=[${MULTILIB_USEDEP}]
 		)
 		>=sys-devel/llvm-3.6.0:=[${MULTILIB_USEDEP}]
 	)
@@ -118,7 +121,7 @@ RDEPEND="
 		video_cards_nouveau? ( !<=x11-libs/libva-vdpau-driver-0.7.4-r3 )
 	)
 	vdpau? ( >=x11-libs/libvdpau-1.1:=[${MULTILIB_USEDEP}] )
-	wayland? ( >=dev-libs/wayland-1.2.0:=[${MULTILIB_USEDEP}] )
+	wayland? ( >=dev-libs/wayland-1.11.0:=[${MULTILIB_USEDEP}] )
 	xvmc? ( >=x11-libs/libXvMC-1.0.8:=[${MULTILIB_USEDEP}] )
 	video_cards_nouveau_vieux? ( ${LIBDRM_DEPSTRING}[nouveau] )
 	${LIBDRM_DEPSTRING}[video_cards_freedreno?,video_cards_nouveau?,video_cards_vc4?,video_cards_vivante?,video_cards_vmware?,${MULTILIB_USEDEP}]
@@ -141,6 +144,7 @@ RDEPEND="${RDEPEND}
 # FIXME: kill the sys-devel/llvm[video_cards_radeon] compat once
 # LLVM < 3.9 is out of the game
 DEPEND="${RDEPEND}
+	${PYTHON_DEPS}
 	llvm? (
 		video_cards_radeonsi? ( || (
 			sys-devel/llvm[llvm_targets_AMDGPU]
@@ -148,8 +152,8 @@ DEPEND="${RDEPEND}
 		) )
 	)
 	opencl? (
-				>=sys-devel/llvm-3.4.2:=[${MULTILIB_USEDEP}]
-				>=sys-devel/clang-3.4.2:=[${MULTILIB_USEDEP}]
+				>=sys-devel/llvm-3.6.0:=[${MULTILIB_USEDEP}]
+				>=sys-devel/clang-3.6.0:=[${MULTILIB_USEDEP}]
 				>=sys-devel/gcc-4.6
 	)
 	sys-devel/gettext
@@ -168,7 +172,6 @@ DEPEND="${RDEPEND}
 [[ ${PV} == 9999 ]] && DEPEND+="
 	sys-devel/bison
 	sys-devel/flex
-	${PYTHON_DEPS}
 	$(python_gen_any_dep ">=dev-python/mako-0.7.3[\${PYTHON_USEDEP}]")
 "
 
@@ -193,6 +196,9 @@ pkg_setup() {
 		ewarn "detected! This can cause problems. For details, see bug 459306."
 	fi
 
+	if use llvm || use opencl; then
+		llvm_pkg_setup
+	fi
 	python-any-r1_pkg_setup
 }
 
@@ -235,7 +241,7 @@ multilib_src_configure() {
 	if use gallium; then
 		myconf+="
 			$(use_enable d3d9 nine)
-			$(use_enable llvm gallium-llvm)
+			$(use_enable llvm)
 			$(use_enable openmax omx)
 			$(use_enable vaapi va)
 			$(use_enable vdpau)
@@ -304,7 +310,6 @@ multilib_src_configure() {
 		--enable-dri \
 		--enable-glx \
 		--enable-shared-glapi \
-		--disable-shader-cache \
 		$(use_enable !bindist texture-float) \
 		$(use_enable d3d9 nine) \
 		$(use_enable debug) \
@@ -380,7 +385,7 @@ multilib_src_install() {
 }
 
 multilib_src_install_all() {
-	prune_libtool_files --all
+	find "${ED}" -name '*.la' -delete
 	einstalldocs
 
 	if use !bindist; then
